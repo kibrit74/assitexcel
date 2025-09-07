@@ -14,7 +14,22 @@ const Shortcut: React.FC<{ keys: string; description: string }> = ({ keys, descr
 );
 
 const KeyboardIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 8h.01"></path><path d="M12 8h.01"></path><path d="M14 8h.01"></path><path d="M16 8h.01"></path><path d="M8 12h.01"></path><path d="M10 12h.01"></path><path d="M12 12h.01"></path><path d="M14 12h.01"></path><path d="M16 12h.01"></path><path d="M8 16h.01"></path><path d="M10 16h.01"></path><path d="M12 16h.01"></path><rect width="20" height="16" x="2" y="4" rx="2"></rect></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="6" width="20" height="12" rx="3" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.6"/>
+        <g fill="#10b981">
+            <circle cx="6" cy="9" r="0.8"/>
+            <circle cx="9" cy="9" r="0.8"/>
+            <circle cx="12" cy="9" r="0.8"/>
+            <circle cx="15" cy="9" r="0.8"/>
+            <circle cx="18" cy="9" r="0.8"/>
+            <circle cx="6.5" cy="12" r="0.8"/>
+            <circle cx="9.5" cy="12" r="0.8"/>
+            <circle cx="12.5" cy="12" r="0.8"/>
+            <circle cx="15.5" cy="12" r="0.8"/>
+            <circle cx="18.5" cy="12" r="0.8"/>
+            <rect x="8" y="14.5" width="8" height="1.5" rx="0.8"/>
+        </g>
+    </svg>
 );
 
 

@@ -1,0 +1,132 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_e81cc4e2988c76e7e71f6b06f516f90f90265aba"
+      ],
+      "type": "stdio"
+    },
+    "desktop-commander": {
+      "disabled": true,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@wonderwhy-er/desktop-commander",
+        "--key",
+        "e9cf3096-34d1-4be0-95e8-f756fa71891b"
+      ],
+      "type": "stdio"
+    },
+    "toolbox": {
+      "disabled": false,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery/toolbox",
+        "--key",
+        "e9cf3096-34d1-4be0-95e8-f756fa71891b",
+        "--profile",
+        "similar-shrimp-PsFLbp"
+      ],
+      "type": "stdio"
+    },
+    "context7-mcp": {
+      "disabled": false,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@upstash/context7-mcp",
+        "--key",
+        "e9cf3096-34d1-4be0-95e8-f756fa71891b"
+      ],
+      "type": "stdio"
+    },
+    "github.com/upstash/context7-mcp": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "type": "stdio"
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "type": "stdio"
+    },
+    "firecrawl": {
+      "disabled": false,
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-7319600518984d47a4360cef247d7b27"
+      },
+      "type": "stdio"
+    },
+    "playwright": {
+      "timeout": 60,
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
+      "type": "stdio"
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\yavuz\\Desktop",
+        "C:\\Users\\yavuz\\Documents\\Cline\\MCP\\filesystem"
+      ],
+      "type": "stdio"
+    }
+  }
+}

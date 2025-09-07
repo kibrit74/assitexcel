@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { WorkbookData, ColumnAnalysis, AppResult, HistoryItem } from './types';
 import { generateFormula, analyzeExcelData, generateMacro, generateWebSearchStream, calculateFormula } from './services/geminiService';
+import { RequestManager } from './services/enhancedAIService';
 import { ResultDisplay } from './components/ResultDisplay';
 import { MacroResultDisplay } from './components/MacroResultDisplay';
 import { WebSearchResultDisplay } from './components/WebSearchResultDisplay';
@@ -10,6 +11,17 @@ import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { HelpCenterModal } from './components/HelpCenterModal';
 import { ExampleDetailModal } from './components/ExampleDetailModal';
 import { helpContent } from './data/helpContent';
+import LandingPage from './components/LandingPage';
+import { ModernNavbar } from './components/ModernNavbar';
+import { EnhancedExcelInterface } from './components/EnhancedExcelInterface';
+import { PerformanceMonitorComponent } from './components/PerformanceMonitor';
+import AccessibilityProvider, { 
+    AccessibleButton, 
+    LiveRegion, 
+    useBreakpoint,
+    ProgressiveDisclosure 
+} from './components/AccessibilityEnhancements';
+import './styles/accessibility.css';
 
 
 declare const XLSX: any;
@@ -19,31 +31,88 @@ const UploadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
 );
 const ExcelIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 15l-2.5 2.5M7.5 15l2.5 2.5M16.5 15l-2.5 2.5M14 15l2.5 2.5"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Excel file background */}
+        <rect x="3" y="2" width="15" height="20" rx="2" ry="2" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
+        {/* Corner fold */}
+        <path d="M15 2v4a2 2 0 0 0 2 2h4" fill="none" stroke="#16a34a" strokeWidth="1.5"/>
+        {/* Grid lines */}
+        <line x1="6" y1="8" x2="15" y2="8" stroke="#16a34a" strokeWidth="0.8"/>
+        <line x1="6" y1="12" x2="15" y2="12" stroke="#16a34a" strokeWidth="0.8"/>
+        <line x1="6" y1="16" x2="15" y2="16" stroke="#16a34a" strokeWidth="0.8"/>
+        <line x1="9" y1="6" x2="9" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
+        <line x1="12" y1="6" x2="12" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
+        {/* Excel X symbol */}
+        <path d="M7 10l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M13 14l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
 );
 const BrainIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v1a2.5 2.5 0 0 1-2.5 2.5h-1A2.5 2.5 0 0 1 6 5.5v-1A2.5 2.5 0 0 1 8.5 2h1Z"></path><path d="M14.5 2A2.5 2.5 0 0 1 17 4.5v1a2.5 2.5 0 0 1-2.5 2.5h-1a2.5 2.5 0 0 1-2.5-2.5v-1A2.5 2.5 0 0 1 12.5 2h2Z"></path><path d="M6 10a2.5 2.5 0 0 1 2.5 2.5v1A2.5 2.5 0 0 1 6 16H5a2.5 2.5 0 0 1-2.5-2.5v-1A2.5 2.5 0 0 1 5 10h1Z"></path><path d="M18 10a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-2.5 2.5h-1a2.5 2.5 0 0 1-2.5-2.5v-1A2.5 2.5 0 0 1 15 10h1Z"></path><path d="M12 15a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-2.5 2.5h-1a2.5 2.5 0 0 1-2.5-2.5v-1A2.5 2.5 0 0 1 10 15h2Z"></path><path d="M9.5 8.5a2.5 2.5 0 0 0 0 5"></path><path d="M14.5 8.5a2.5 2.5 0 0 1 0 5"></path><path d="M12 8V6.5"></path><path d="M12 17.5V16"></path></svg>
 );
-const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
+const ChevronDownIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M7 10l5 5 5-5" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <circle cx="12" cy="12" r="8" fill="none" stroke="#10b981" strokeWidth="0.8" opacity="0.3"/>
+    </svg>
+);
 const KeyboardIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="18" height="18" x="3" y="3" rx="2" />
-        <path d="M7 8h10" />
-        <path d="M7 12h10" />
-        <path d="M7 16h6" />
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="6" width="20" height="12" rx="3" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.6"/>
+        <g fill="#10b981">
+            <rect x="4" y="8" width="2" height="2" rx="0.5"/>
+            <rect x="7" y="8" width="2" height="2" rx="0.5"/>
+            <rect x="10" y="8" width="2" height="2" rx="0.5"/>
+            <rect x="13" y="8" width="2" height="2" rx="0.5"/>
+            <rect x="16" y="8" width="2" height="2" rx="0.5"/>
+            <rect x="4.5" y="11" width="2" height="2" rx="0.5"/>
+            <rect x="7.5" y="11" width="2" height="2" rx="0.5"/>
+            <rect x="10.5" y="11" width="2" height="2" rx="0.5"/>
+            <rect x="13.5" y="11" width="2" height="2" rx="0.5"/>
+            <rect x="16.5" y="11" width="2" height="2" rx="0.5"/>
+            <rect x="6" y="14" width="8" height="2" rx="0.5"/>
+        </g>
     </svg>
 );
 const BookOpenIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1.6" strokeLinejoin="round"/>
+        <path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.6" strokeLinejoin="round"/>
+        <path d="M12 8v12" stroke="#10b981" strokeWidth="1.2"/>
+        <g stroke="#10b981" strokeWidth="1" opacity="0.7">
+            <path d="M5 9h3M5 12h4M5 15h2"/>
+            <path d="M16 9h3M15 12h4M17 15h2"/>
+        </g>
     </svg>
 );
 const SheetIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8" strokeLinejoin="round"/>
+        <path d="M14 2v6h6" fill="none" stroke="#10b981" strokeWidth="1.6" strokeLinejoin="round"/>
+        <g stroke="#10b981" strokeWidth="1.2" opacity="0.8">
+            <path d="M16 13H8M16 17H8M10 9H8"/>
+        </g>
+        <g fill="#10b981" opacity="0.6">
+            <circle cx="9" cy="13" r="0.8"/>
+            <circle cx="9" cy="17" r="0.8"/>
+        </g>
+    </svg>
 );
-const AttachmentIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>;
-const XCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>;
+const AttachmentIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="#10b981" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+        <circle cx="12" cy="7" r="1.5" fill="#10b981" fillOpacity="0.8"/>
+        <circle cx="17" cy="12" r="1" fill="#10b981" fillOpacity="0.6"/>
+    </svg>
+);
+const XCircleIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+        <g stroke="#10b981" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M15 9l-6 6M9 9l6 6"/>
+        </g>
+    </svg>
+);
 const SpinnerIcon = () => (
     <svg className="animate-spin h-5 w-5 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -92,6 +161,10 @@ const formatCellValue = (cell: any): string => {
 
 
 const App: React.FC = () => {
+    // Responsive breakpoint support
+    const { isMobile, isTablet, isDesktop, isSmall } = useBreakpoint();
+    
+    const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
     const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
     const [activeSheet, setActiveSheet] = useState<string>('');
     const [fileName, setFileName] = useState<string>('');
@@ -125,8 +198,14 @@ const App: React.FC = () => {
 
 
     const PlusCircleIcon = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-    );
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+        <g stroke="#10b981" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M12 8v8M8 12h8"/>
+        </g>
+        <circle cx="12" cy="12" r="1" fill="#10b981"/>
+    </svg>
+);
 
     useEffect(() => {
         try {
@@ -188,6 +267,21 @@ const App: React.FC = () => {
         }
     }, [trustedFormulaLibrary]);
 
+    const handleToggleLivePreview = (formula?: string | null) => {
+        if (!formula || formula === null) {
+            setLivePreviewFormula(null);
+            setLiveFormulaCell(null);
+            return;
+        }
+        setLivePreviewFormula(prev => {
+            const newFormula = prev === formula ? null : formula;
+            if (newFormula === null) {
+                setLiveFormulaCell(null);
+            }
+            return newFormula;
+        });
+    };
+
     const handleConfirmFormula = (prompt: string, formula: string) => {
         setTrustedFormulaLibrary(prev => {
             if (prev.some(item => item.formula === formula && item.prompt === prompt)) {
@@ -196,16 +290,6 @@ const App: React.FC = () => {
             const newItem = { prompt, formula };
             const newLibrary = [newItem, ...prev].slice(0, 50); // Keep library size reasonable
             return newLibrary;
-        });
-    };
-
-    const handleToggleLivePreview = (formula: string | null) => {
-        setLivePreviewFormula(prev => {
-            const newFormula = prev === formula || formula === null ? null : formula;
-            if (newFormula === null) {
-                setLiveFormulaCell(null);
-            }
-            return newFormula;
         });
     };
 
@@ -495,6 +579,7 @@ const App: React.FC = () => {
             setError("Oluşturma işlemi kullanıcı tarafından iptal edildi.");
             abortControllerRef.current = null;
         }
+        RequestManager.cancel(); // Cancel any ongoing AI operations
     };
     
     const handleSubmit = async () => {
@@ -614,83 +699,6 @@ const App: React.FC = () => {
 
     const columnHeaders = useMemo(() => generateColumnHeaders(sheetData.colCount), [sheetData.colCount]);
     
-    const renderTable = () => {
-        if (!workbookData) return null;
-
-        const { rows, colCount } = sheetData;
-        
-        return (
-             <div className="overflow-auto bg-white rounded-xl border border-slate-200/80 shadow-sm mt-4 max-h-[40vh] relative">
-                <table className="w-full text-sm text-left border-collapse select-none">
-                    <thead className="sticky top-0 bg-slate-100 z-10">
-                        <tr>
-                            <th className="p-2 border border-slate-200 w-12 font-semibold text-slate-500 text-center">#</th>
-                            {columnHeaders.map((header, colIndex) => (
-                                <th 
-                                    key={header} 
-                                    className="p-2 border border-slate-200 font-semibold text-slate-500 text-center min-w-[100px] cursor-pointer hover:bg-slate-200 transition-colors"
-                                    onMouseDown={() => handleColumnHeaderMouseDown(colIndex)}
-                                    onMouseOver={() => handleColumnHeaderMouseOver(colIndex)}
-                                >
-                                    {header}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody onMouseLeave={() => setIsSelecting(false)}>
-                        {rows.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="hover:bg-slate-50">
-                                <td 
-                                    className="p-2 border border-slate-200 bg-slate-100 text-slate-500 text-center font-semibold cursor-pointer hover:bg-slate-200 transition-colors"
-                                    onMouseDown={() => handleRowHeaderMouseDown(rowIndex)}
-                                    onMouseOver={() => handleRowHeaderMouseOver(rowIndex)}
-                                >
-                                    {rowIndex + 1}
-                                </td>
-                                {Array.from({ length: colCount }).map((_, colIndex) => {
-                                    const cell = row ? row[colIndex] : null;
-                                    const isSelected = isCellSelected(rowIndex, colIndex);
-                                    const isPreviewCell = !!livePreviewFormula && liveFormulaCell && liveFormulaCell.sheet === activeSheet && liveFormulaCell.row === rowIndex && liveFormulaCell.col === colIndex;
-                                    const isPreviewLoading = isPreviewCell && liveFormulaCell.isLoading;
-                                    
-                                    const cellContent = isPreviewCell ? liveFormulaCell.value : formatCellValue(cell);
-
-                                    return (
-                                        <td
-                                            key={colIndex}
-                                            onMouseDown={() => handleCellMouseDown(rowIndex, colIndex)}
-                                            onMouseOver={() => handleMouseOverTable(rowIndex, colIndex)}
-                                            title={isPreviewCell ? "Bu formülün bu satıra uygulandığında nasıl görüneceğinin önizlemesi." : !!livePreviewFormula ? "Formül önizlemesi için tıklayın" : "Hücre aralığı seçmek için sürükleyin"}
-                                            className={`p-2 border border-slate-200 whitespace-nowrap cursor-cell transition-colors duration-100 relative group
-                                                ${isSelected ? 'bg-emerald-200/50' : ''}
-                                                ${isPreviewCell ? '!bg-amber-100 border-amber-400 text-amber-900 font-mono' : ''}
-                                                ${isPreviewLoading ? 'flex items-center justify-center' : ''}
-                                            `}
-                                        >
-                                            {isPreviewLoading ? <SpinnerIcon /> : cellContent}
-                                            {!isPreviewCell && !isSelecting && (
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleAppendCellContentToPrompt(rowIndex, colIndex);
-                                                    }}
-                                                    className="absolute top-1/2 right-1 -translate-y-1/2 bg-slate-200/80 text-slate-600 hover:bg-emerald-500 hover:text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    aria-label="Hücre içeriğini ekle"
-                                                >
-                                                    <PlusCircleIcon />
-                                                </button>
-                                            )}
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-             </div>
-        );
-    };
-    
     const renderMainContent = () => {
         if (result) {
             switch(result.type) {
@@ -805,60 +813,105 @@ const App: React.FC = () => {
     };
 
 
-    return (
-        <div className="min-h-screen bg-slate-50">
-            <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-20 border-b border-slate-200/80">
-                <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-20">
-                        <div className="flex items-center gap-4">
-                             <div className="flex-shrink-0 bg-emerald-100 text-emerald-600 p-2 rounded-lg">
-                                 <SheetIcon />
-                            </div>
-                            <h1 className="text-2xl font-bold text-slate-800">Excel Formül & Makro Yardımcısı</h1>
-                        </div>
-                         <div className="flex items-center gap-3">
-                            <div className="relative group">
-                                <button onClick={() => setIsShortcutsModalOpen(true)} className="p-2 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors" aria-label="Klavye Kısayolları">
-                                    <KeyboardIcon />
-                                </button>
-                                <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max bg-slate-700 text-white text-xs font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30">
-                                    Klavye Kısayolları
-                                </span>
-                            </div>
-                            <div className="relative group">
-                                <button onClick={() => setIsHelpCenterModalOpen(true)} className="p-2 text-emerald-600 hover:bg-emerald-100 rounded-full transition-colors" aria-label="Yardım Merkezi">
-                                    <BookOpenIcon />
-                                </button>
-                                <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max bg-slate-700 text-white text-xs font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30">
-                                    Yardım Merkezi
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+    // Landing page view
+    if (currentView === 'landing') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen bg-slate-50">
+                    {/* Live region for screen reader announcements */}
+                    <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
+                    
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    />
+                    <LandingPage 
+                        onGetStarted={() => setCurrentView('app')}
+                    />
+                    
+                    {/* Global Modals */}
+                    {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                    {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                    
+                    {/* Performance Monitor */}
+                    <PerformanceMonitorComponent />
                 </div>
-            </header>
+            </AccessibilityProvider>
+        );
+    }
 
-            <main className="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
-                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                     <div className="lg:col-span-3">
-                        {/* File Upload and Prompt Section */}
-                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                            {/* File Info */}
-                            {workbookData && (
-                                <div className="flex items-center justify-between mb-4 p-3 bg-slate-50 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-emerald-600"><ExcelIcon /></div>
-                                        <span className="font-semibold">{fileName}</span>
+    // Main application view
+    return (
+        <AccessibilityProvider>
+            <div className="min-h-screen bg-slate-50">
+                {/* Live region for screen reader announcements */}
+                <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
+                
+                <ModernNavbar 
+                    currentView={currentView}
+                    onViewChange={setCurrentView}
+                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                />
+
+                <main id="main-content" className="container-responsive" role="main" aria-label="Excel formül yardımcısı ana uygulama">
+                     <div className={`grid gap-8 py-8 ${isDesktop ? 'grid-cols-4 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                         <div className={isDesktop ? 'lg:col-span-3' : 'col-span-1'}>
+                            {/* File Upload and Prompt Section */}
+                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 space-y-responsive">
+                                {/* File Upload Section - when no workbook */}
+                                {!workbookData && (
+                                    <div className="text-center py-12">
+                                        <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-6">
+                                            <ExcelIcon />
+                                        </div>
+                                        <h2 className="responsive-text-2xl font-bold text-slate-800 mb-4">
+                                            Excel Dosyanızı Yükleyin
+                                        </h2>
+                                        <p className="responsive-text-lg text-slate-600 mb-8 max-w-md mx-auto">
+                                            Formül veya makro oluşturmak için Excel dosyanızı (.xlsx, .xls) yükleyin
+                                        </p>
+                                        <AccessibleButton
+                                            onClick={() => fileInputRef.current?.click()}
+                                            size={isMobile ? 'md' : 'lg'}
+                                            ariaLabel="Excel dosyası seç"
+                                            className="touch-target"
+                                        >
+                                            <UploadIcon />
+                                            <span className="ml-2">Dosya Seç</span>
+                                        </AccessibleButton>
+                                        <input 
+                                            type="file" 
+                                            ref={fileInputRef} 
+                                            onChange={handleFileChange} 
+                                            className="hidden" 
+                                            accept=".xlsx, .xls"
+                                            aria-label="Excel dosyası seçici"
+                                        />
                                     </div>
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="text-sm font-semibold text-emerald-600 hover:underline"
-                                    >
-                                        Dosyayı Değiştir
-                                    </button>
-                                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".xlsx, .xls"/>
-                                </div>
-                            )}
+                                )}
+                                
+                                {/* File Info - when workbook is loaded */}
+                                {workbookData && (
+                                    <div className="flex items-center justify-between mb-4 p-3 bg-slate-50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-emerald-600"><ExcelIcon /></div>
+                                            <span className="font-semibold">{fileName}</span>
+                                        </div>
+                                        <AccessibleButton
+                                            onClick={() => fileInputRef.current?.click()}
+                                            variant="ghost"
+                                            size="sm"
+                                            ariaLabel="Excel dosyasını değiştir"
+                                            className="touch-target"
+                                        >
+                                            Dosyayı Değiştir
+                                        </AccessibleButton>
+                                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".xlsx, .xls"/>
+                                    </div>
+                                )}
 
                              {/* Mode Selection */}
                             <div className="flex justify-center mb-4">
@@ -919,87 +972,103 @@ const App: React.FC = () => {
                              </div>
 
                              {/* Options and Submit */}
-                           <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-4">
-                                <div className="flex items-center gap-4 flex-wrap">
-                                    {mode === 'formula' && (
-                                        <div className="flex items-center gap-2">
-                                            <label className="font-semibold text-slate-600 text-sm">Dil:</label>
-                                            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg">
-                                                <button onClick={() => setExcelLanguage('tr')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'tr' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>TR</button>
-                                                <button onClick={() => setExcelLanguage('en')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'en' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>EN</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                     {mode === 'formula' && (
-                                        <div className="flex items-center gap-2">
-                                            <label htmlFor="excelVersion" className="font-semibold text-slate-600 text-sm">Versiyon:</label>
-                                            <div className="relative">
-                                                <select
-                                                    id="excelVersion"
-                                                    value={excelVersion}
-                                                    onChange={(e) => setExcelVersion(e.target.value)}
-                                                    className="appearance-none bg-white border border-slate-300 rounded-lg py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                                >
-                                                    <option value="365">365 / 2021+</option>
-                                                    <option value="2019">2019</option>
-                                                    <option value="2016">2016</option>
-                                                    <option value="2013">2013 ve Eski</option>
-                                                </select>
-                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
-                                                    <ChevronDownIcon />
+                           <div className="flex flex-col space-y-4">
+                                {/* Progressive disclosure for advanced options */}
+                                <ProgressiveDisclosure 
+                                    title="Gelişmiş Seçenekler"
+                                    defaultOpen={false}
+                                    className="border border-slate-200 rounded-lg"
+                                >
+                                    <div className="grid-responsive gap-4">
+                                        {mode === 'formula' && (
+                                            <div className="flex items-center gap-2">
+                                                <label className="font-semibold text-slate-600 text-sm">Dil:</label>
+                                                <div className="flex items-center bg-slate-100 p-0.5 rounded-lg">
+                                                    <button onClick={() => setExcelLanguage('tr')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'tr' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>TR</button>
+                                                    <button onClick={() => setExcelLanguage('en')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'en' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>EN</button>
                                                 </div>
                                             </div>
+                                        )}
+                                         {mode === 'formula' && (
+                                            <div className="flex items-center gap-2">
+                                                <label htmlFor="excelVersion" className="font-semibold text-slate-600 text-sm">Versiyon:</label>
+                                                <div className="relative">
+                                                    <select
+                                                        id="excelVersion"
+                                                        value={excelVersion}
+                                                        onChange={(e) => setExcelVersion(e.target.value)}
+                                                        className="appearance-none bg-white border border-slate-300 rounded-lg py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                    >
+                                                        <option value="365">365 / 2021+</option>
+                                                        <option value="2019">2019</option>
+                                                        <option value="2016">2016</option>
+                                                        <option value="2013">2013 ve Eski</option>
+                                                    </select>
+                                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                                                        <ChevronDownIcon />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                id="webSearch"
+                                                checked={useWebSearch}
+                                                onChange={(e) => setUseWebSearch(e.target.checked)}
+                                                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                            />
+                                            <label htmlFor="webSearch" className="text-sm text-slate-600">🌐 Web Destekli</label>
                                         </div>
-                                    )}
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            id="webSearch"
-                                            checked={useWebSearch}
-                                            onChange={(e) => setUseWebSearch(e.target.checked)}
-                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                        />
-                                        <label htmlFor="webSearch" className="text-sm text-slate-600">🌐 Web Destekli</label>
                                     </div>
-                                </div>
+                                </ProgressiveDisclosure>
                                 
+                                {/* Submit Button */}
+                                <div className="flex justify-center">
                                 {isLoading ? (
-                                    <button
+                                    <AccessibleButton
                                         onClick={handleCancel}
-                                        className="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center shadow-sm"
-                                        aria-label="Oluşturmayı durdur"
+                                        variant="secondary"
+                                        size={isMobile ? 'md' : 'lg'}
+                                        ariaLabel="Oluşturmayı durdur"
+                                        className="w-full sm:w-auto bg-red-600 text-white hover:bg-red-700 touch-target"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect width="12" height="12" x="6" y="6" rx="1"/></svg>
-                                    </button>
+                                        <span className="ml-2">Durdur</span>
+                                    </AccessibleButton>
                                 ) : (
-                                    <button
+                                    <AccessibleButton
                                         onClick={handleSubmit}
                                         disabled={!workbookData || isAnalyzing || !userPrompt}
-                                        className="w-full sm:w-auto bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-emerald-700 transition-colors disabled:bg-emerald-300 disabled:cursor-not-allowed flex items-center justify-center shadow-sm hover:shadow-md disabled:shadow-none"
+                                        size={isMobile ? 'md' : 'lg'}
+                                        ariaLabel={mode === 'formula' ? 'Formül oluştur' : 'Makro kodu oluştur'}
+                                        className="w-full sm:w-auto touch-target"
                                     >
                                         Oluştur
-                                        <span className="hidden sm:inline bg-emerald-700 text-emerald-100 text-xs font-mono ml-3 px-2 py-0.5 rounded-md">Ctrl+Enter</span>
-                                    </button>
+                                        {!isMobile && (
+                                            <span className="bg-emerald-700 text-emerald-100 text-xs font-mono ml-3 px-2 py-0.5 rounded-md">Ctrl+Enter</span>
+                                        )}
+                                    </AccessibleButton>
                                 )}
-                             </div>
-                         </div>
-                        
-                        {/* Data Preview */}
-                        {workbookData && (
-                             <div>
-                                <div className="flex items-center gap-4 mt-6">
-                                    {Object.keys(workbookData).map(sheetName => (
-                                        <button
-                                            key={sheetName}
-                                            onClick={() => setActiveSheet(sheetName)}
-                                            className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${activeSheet === sheetName ? 'bg-white border-t border-l border-r border-slate-200/80 text-emerald-600' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                                        >
-                                            {sheetName}
-                                        </button>
-                                    ))}
                                 </div>
-                                {renderTable()}
                              </div>
+                             </div>
+                        
+                        {/* Enhanced Data Preview */}
+                        {workbookData && (
+                            <EnhancedExcelInterface 
+                                workbookData={workbookData}
+                                activeSheet={activeSheet}
+                                onSheetChange={setActiveSheet}
+                                onCellAppend={handleAppendCellContentToPrompt}
+                                livePreviewFormula={livePreviewFormula}
+                                liveFormulaCell={liveFormulaCell}
+                                showDataTypes={true}
+                                enableFiltering={true}
+                                enableSearch={true}
+                                virtualScrolling={true}
+                                maxVisibleRows={100}
+                            />
                         )}
 
                         {error && (
@@ -1009,29 +1078,33 @@ const App: React.FC = () => {
                         )}
                         
                         {renderMainContent()}
+                         </div>
+                         <div className="lg:col-span-1">
+                            <HistoryDisplay 
+                                history={history} 
+                                onSelect={(res) => {
+                                    setResult(res);
+                                    window.scrollTo(0, 0);
+                                }} 
+                                onClear={() => {
+                                    setHistory([]);
+                                    setTrustedFormulaLibrary([]);
+                                    localStorage.removeItem('formulaHistory');
+                                    localStorage.removeItem('trustedFormulaLibrary');
+                                    setResult(null);
+                                }}
+                            />
+                         </div>
                      </div>
-                     <div className="lg:col-span-1">
-                        <HistoryDisplay 
-                            history={history} 
-                            onSelect={(res) => {
-                                setResult(res);
-                                window.scrollTo(0, 0);
-                            }} 
-                            onClear={() => {
-                                setHistory([]);
-                                setTrustedFormulaLibrary([]);
-                                localStorage.removeItem('formulaHistory');
-                                localStorage.removeItem('trustedFormulaLibrary');
-                                setResult(null);
-                            }}
-                        />
-                     </div>
-                 </div>
-            </main>
+                </main>
             <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />
             <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />
             <ExampleDetailModal example={selectedExample} onClose={() => setSelectedExample(null)} onUse={handleUseExample} />
+            
+            {/* Performance Monitor */}
+            <PerformanceMonitorComponent />
         </div>
+        </AccessibilityProvider>
     );
 };
 

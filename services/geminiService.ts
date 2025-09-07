@@ -1,5 +1,3 @@
-
-
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { 
     FORMULA_SYSTEM_PROMPT_JSON,
@@ -10,6 +8,18 @@ import {
 } from '../constants';
 import { helpContent } from '../data/helpContent';
 import type { WorkbookData, FormulaResponse, ColumnAnalysis, MacroResponse, AppResult } from '../types';
+import {
+    AIServiceError,
+    ValidationError,
+    TimeoutError,
+    RateLimitError,
+    ResponseValidator,
+    RetryManager,
+    RequestManager,
+    PerformanceMonitor,
+    ResponseProcessor
+} from './enhancedAIService';
+import { CacheService } from './performanceOptimizations';
 
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable not set");
@@ -107,31 +117,84 @@ const analysisSchema = {
 };
 
 export const analyzeExcelData = async (workbookData: WorkbookData): Promise<ColumnAnalysis[]> => {
-    const formattedExcelData = formatExcelDataForPrompt(workbookData);
-    const userContent = `
+    const endTimer = PerformanceMonitor.startTimer('analyzeExcelData');
+    
+    // Check cache first
+    const cachedResult = CacheService.getCachedAnalysis(workbookData);
+    if (cachedResult) {
+        console.log('Using cached analysis result');
+        endTimer();
+        return cachedResult;
+    }
+    
+    try {
+        const formattedExcelData = formatExcelDataForPrompt(workbookData);
+        const userContent = `
 --- ANALİZ EDİLECEK EXCEL VERİSİ ---
 ${formattedExcelData}
   `;
 
-  try {
-    const response : GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: { parts: [{ text: userContent }] },
-      config: {
-        systemInstruction: ANALYSIS_SYSTEM_PROMPT,
-        responseMimeType: "application/json",
-        responseSchema: analysisSchema,
-        temperature: 0.1,
-      },
-    });
+        const analysisOperation = async () => {
+            return await RequestManager.withTimeout(async () => {
+                const response: GenerateContentResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: { parts: [{ text: userContent }] },
+                    config: {
+                        systemInstruction: ANALYSIS_SYSTEM_PROMPT,
+                        responseMimeType: "application/json",
+                        responseSchema: analysisSchema,
+                        temperature: 0.1,
+                    },
+                });
 
-    const jsonText = response.text.trim();
-    return JSON.parse(jsonText) as ColumnAnalysis[];
-  } catch (error) {
-    console.error("Error calling Gemini API for analysis:", error);
-    throw new Error("Excel verisi analiz edilirken bir hata oluştu.");
-  }
-}
+                const jsonText = response.text?.trim();
+                if (!jsonText) {
+                    throw new AIServiceError('Empty response from AI service', 'EMPTY_RESPONSE', true);
+                }
+
+                return await ResponseProcessor.safeJsonParse(
+                    jsonText,
+                    ResponseValidator.validateColumnAnalysis,
+                    'column analysis'
+                );
+            }, 15000); // 15 second timeout for analysis
+        };
+
+        const result = await RetryManager.withRetry(
+            analysisOperation,
+            3, // Max 3 retries
+            1000, // 1 second base delay
+            (error) => {
+                // Retry on timeout, rate limit, or retryable AI service errors
+                return error instanceof TimeoutError || 
+                       error instanceof RateLimitError ||
+                       (error instanceof AIServiceError && error.retryable);
+            }
+        );
+
+        // Cache the successful result
+        CacheService.setCachedAnalysis(workbookData, result);
+        
+        const duration = endTimer();
+        console.log(`Excel data analysis completed in ${duration.toFixed(2)}ms`);
+        
+        return result;
+    } catch (error) {
+        endTimer();
+        console.error("Error in analyzeExcelData:", error);
+        
+        if (error instanceof ValidationError || error instanceof TimeoutError) {
+            throw error;
+        }
+        
+        throw new AIServiceError(
+            "Excel verisi analiz edilirken bir hata oluştu. Lütfen tekrar deneyin.",
+            'ANALYSIS_ERROR',
+            true,
+            error instanceof Error ? error : undefined
+        );
+    }
+};
 
 const responseSchema = {
   type: Type.OBJECT,
@@ -284,29 +347,119 @@ export const generateFormula = async (
   image: string | null,
   trustedFormulas: TrustedFormula[],
   ): Promise<AppResult> => {
-    const formattedExcelData = formatExcelDataForPrompt(workbookData);
-    const formattedAnalysis = formatAnalysisForPrompt(analysis);
-    const formattedFormulaLibrary = formatFormulaLibraryForPrompt(trustedFormulas);
-    const userContentText = buildUserContent('formula', formattedExcelData, formattedAnalysis, userPrompt, excelLanguage, excelVersion, undefined, formattedFormulaLibrary);
-    const contents = buildContentRequest(userContentText, image);
-
+    const endTimer = PerformanceMonitor.startTimer('generateFormula');
+    
+    // Check cache first (only if no image is provided)
+    if (!image) {
+        const cachedResult = CacheService.getCachedFormula(
+            workbookData, 
+            userPrompt, 
+            analysis, 
+            excelLanguage, 
+            excelVersion
+        );
+        if (cachedResult) {
+            console.log('Using cached formula result');
+            endTimer();
+            return cachedResult;
+        }
+    }
+    
     try {
-        const response: GenerateContentResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: contents,
-            config: {
-                systemInstruction: FORMULA_SYSTEM_PROMPT_JSON,
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-                temperature: 0.2,
-            },
-        });
-        const jsonText = response.text.trim();
-        const formulaData = JSON.parse(jsonText) as FormulaResponse;
-        return { type: 'formula', data: formulaData };
+        const formattedExcelData = formatExcelDataForPrompt(workbookData);
+        const formattedAnalysis = formatAnalysisForPrompt(analysis);
+        const formattedFormulaLibrary = formatFormulaLibraryForPrompt(trustedFormulas);
+        const userContentText = buildUserContent('formula', formattedExcelData, formattedAnalysis, userPrompt, excelLanguage, excelVersion, undefined, formattedFormulaLibrary);
+        const contents = buildContentRequest(userContentText, image);
+
+        const formulaOperation = async () => {
+            return await RequestManager.withTimeout(async () => {
+                const response: GenerateContentResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: contents,
+                    config: {
+                        systemInstruction: FORMULA_SYSTEM_PROMPT_JSON,
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema,
+                        temperature: 0.2,
+                    },
+                });
+                
+                const jsonText = response.text?.trim();
+                if (!jsonText) {
+                    throw new AIServiceError('Empty response from AI service', 'EMPTY_RESPONSE', true);
+                }
+
+                const formulaData = await ResponseProcessor.safeJsonParse(
+                    jsonText,
+                    ResponseValidator.validateFormulaResponse,
+                    'formula generation'
+                );
+                
+                return { type: 'formula' as const, data: formulaData };
+            }, 25000); // 25 second timeout for formula generation
+        };
+
+        const result = await RetryManager.withRetry(
+            formulaOperation,
+            2, // Max 2 retries for formula generation
+            1500, // 1.5 second base delay
+            (error) => {
+                // Be more selective about retries for formula generation
+                return error instanceof TimeoutError ||
+                       error instanceof RateLimitError ||
+                       (error instanceof AIServiceError && error.retryable && error.code !== 'VALIDATION_ERROR');
+            }
+        );
+
+        // Cache the successful result (only if no image was provided)
+        if (!image) {
+            CacheService.setCachedFormula(
+                workbookData, 
+                userPrompt, 
+                analysis, 
+                excelLanguage, 
+                excelVersion, 
+                result
+            );
+        }
+
+        const duration = endTimer();
+        console.log(`Formula generation completed in ${duration.toFixed(2)}ms`);
+        
+        return result;
     } catch (error) {
-        console.error("Error calling Gemini API:", error);
-        throw new Error("Formül oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
+        endTimer();
+        console.error("Error in generateFormula:", error);
+        
+        if (error instanceof ValidationError) {
+            throw new AIServiceError(
+                "Oluşturulan formül beklenmeyen bir formatta. Lütfen isteğinizi daha açık bir şekilde belirtin ve tekrar deneyin.",
+                'VALIDATION_ERROR',
+                false,
+                error
+            );
+        }
+        
+        if (error instanceof TimeoutError) {
+            throw new AIServiceError(
+                "Formül oluşturma işlemi zaman aşımına uğradı. Lütfen tekrar deneyin.",
+                'TIMEOUT_ERROR',
+                true,
+                error
+            );
+        }
+        
+        if (error instanceof AIServiceError) {
+            throw error;
+        }
+        
+        throw new AIServiceError(
+            "Formül oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
+            'GENERATION_ERROR',
+            true,
+            error instanceof Error ? error : undefined
+        );
     }
 };
 
@@ -350,30 +503,106 @@ export const generateMacro = async (
   analysis: ColumnAnalysis[],
   image: string | null,
 ): Promise<AppResult> => {
-  const formattedExcelData = formatExcelDataForPrompt(workbookData);
-  const formattedAnalysis = formatAnalysisForPrompt(analysis);
-  const formattedMacroLibrary = formatMacroLibraryForPrompt();
-  const userContentText = buildUserContent('macro', formattedExcelData, formattedAnalysis, userPrompt, undefined, undefined, formattedMacroLibrary);
-  const contents = buildContentRequest(userContentText, image);
+    const endTimer = PerformanceMonitor.startTimer('generateMacro');
+    
+    // Check cache first (only if no image is provided)
+    if (!image) {
+        const cachedResult = CacheService.getCachedMacro(workbookData, userPrompt, analysis);
+        if (cachedResult) {
+            console.log('Using cached macro result');
+            endTimer();
+            return cachedResult;
+        }
+    }
+    
+    try {
+        const formattedExcelData = formatExcelDataForPrompt(workbookData);
+        const formattedAnalysis = formatAnalysisForPrompt(analysis);
+        const formattedMacroLibrary = formatMacroLibraryForPrompt();
+        const userContentText = buildUserContent('macro', formattedExcelData, formattedAnalysis, userPrompt, undefined, undefined, formattedMacroLibrary);
+        const contents = buildContentRequest(userContentText, image);
 
-  try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: contents,
-        config: {
-            systemInstruction: MACRO_SYSTEM_PROMPT_JSON,
-            responseMimeType: "application/json",
-            responseSchema: macroResponseSchema,
-            temperature: 0.3,
-        },
-    });
-    const jsonText = response.text.trim();
-    const macroData = JSON.parse(jsonText) as MacroResponse;
-    return { type: 'macro', data: macroData };
-  } catch (error) {
-    console.error("Error calling Gemini API for macro generation:", error);
-    throw new Error("Makro kodu oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
-  }
+        const macroOperation = async () => {
+            return await RequestManager.withTimeout(async () => {
+                const response: GenerateContentResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: contents,
+                    config: {
+                        systemInstruction: MACRO_SYSTEM_PROMPT_JSON,
+                        responseMimeType: "application/json",
+                        responseSchema: macroResponseSchema,
+                        temperature: 0.3,
+                    },
+                });
+                
+                const jsonText = response.text?.trim();
+                if (!jsonText) {
+                    throw new AIServiceError('Empty response from AI service', 'EMPTY_RESPONSE', true);
+                }
+
+                const macroData = await ResponseProcessor.safeJsonParse(
+                    jsonText,
+                    ResponseValidator.validateMacroResponse,
+                    'macro generation'
+                );
+                
+                return { type: 'macro' as const, data: macroData };
+            }, 30000); // 30 second timeout for macro generation
+        };
+
+        const result = await RetryManager.withRetry(
+            macroOperation,
+            2, // Max 2 retries for macro generation
+            2000, // 2 second base delay
+            (error) => {
+                return error instanceof TimeoutError ||
+                       error instanceof RateLimitError ||
+                       (error instanceof AIServiceError && error.retryable && error.code !== 'VALIDATION_ERROR');
+            }
+        );
+
+        // Cache the successful result (only if no image was provided)
+        if (!image) {
+            CacheService.setCachedMacro(workbookData, userPrompt, analysis, result);
+        }
+
+        const duration = endTimer();
+        console.log(`Macro generation completed in ${duration.toFixed(2)}ms`);
+        
+        return result;
+    } catch (error) {
+        endTimer();
+        console.error("Error in generateMacro:", error);
+        
+        if (error instanceof ValidationError) {
+            throw new AIServiceError(
+                "Oluşturulan makro kodu beklenmeyen bir formatta. Lütfen isteğinizi daha açık bir şekilde belirtin ve tekrar deneyin.",
+                'VALIDATION_ERROR',
+                false,
+                error
+            );
+        }
+        
+        if (error instanceof TimeoutError) {
+            throw new AIServiceError(
+                "Makro kodu oluşturma işlemi zaman aşımına uğradı. Lütfen tekrar deneyin.",
+                'TIMEOUT_ERROR',
+                true,
+                error
+            );
+        }
+        
+        if (error instanceof AIServiceError) {
+            throw error;
+        }
+        
+        throw new AIServiceError(
+            "Makro kodu oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
+            'GENERATION_ERROR',
+            true,
+            error instanceof Error ? error : undefined
+        );
+    }
 };
 
 const CALCULATION_SYSTEM_PROMPT = `
@@ -400,10 +629,21 @@ export const calculateFormula = async (
     headers: string[],
     excelLanguage: 'tr' | 'en'
 ): Promise<string> => {
-    const formattedRowData = formatRowDataForPrompt(rowData, headers, rowIndex);
-    const formattedExcelData = formatExcelDataForPrompt(workbookData);
+    const endTimer = PerformanceMonitor.startTimer('calculateFormula');
+    
+    // Check cache first
+    const cachedResult = CacheService.getCachedCalculation(formula, rowData, excelLanguage);
+    if (cachedResult) {
+        console.log('Using cached calculation result');
+        endTimer();
+        return cachedResult;
+    }
+    
+    try {
+        const formattedRowData = formatRowDataForPrompt(rowData, headers, rowIndex);
+        const formattedExcelData = formatExcelDataForPrompt(workbookData);
 
-    const userContent = `
+        const userContent = `
 --- EXCEL DİLİ ---
 ${excelLanguage === 'tr' ? 'Türkçe (argüman ayıracı olarak noktalı virgül ";" kullan)' : 'İngilizce (argüman ayıracı olarak virgül "," kullan)'}
 
@@ -418,19 +658,64 @@ ${formattedRowData}
 ${formattedExcelData}
 `;
 
-    try {
-        const response: GenerateContentResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: { parts: [{ text: userContent }] },
-            config: {
-                systemInstruction: CALCULATION_SYSTEM_PROMPT,
-                temperature: 0,
-            },
-        });
-        return response.text.trim().replace(/^"(.*)"$/, '$1');
+        const calculationOperation = async () => {
+            return await RequestManager.withTimeout(async () => {
+                const response: GenerateContentResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: { parts: [{ text: userContent }] },
+                    config: {
+                        systemInstruction: CALCULATION_SYSTEM_PROMPT,
+                        temperature: 0,
+                    },
+                });
+                
+                const resultText = response.text?.trim();
+                if (!resultText) {
+                    throw new AIServiceError('Empty calculation result', 'EMPTY_RESPONSE', true);
+                }
+                
+                // Clean up quoted results
+                return resultText.replace(/^"(.*)"$/, '$1');
+            }, 10000); // 10 second timeout for calculations
+        };
+
+        const result = await RetryManager.withRetry(
+            calculationOperation,
+            2, // Max 2 retries for calculations
+            800, // 800ms base delay
+            (error) => {
+                return error instanceof TimeoutError ||
+                       error instanceof RateLimitError ||
+                       (error instanceof AIServiceError && error.retryable);
+            }
+        );
+
+        // Cache the successful result
+        CacheService.setCachedCalculation(formula, rowData, excelLanguage, result);
+
+        const duration = endTimer();
+        console.log(`Formula calculation completed in ${duration.toFixed(2)}ms`);
+        
+        return result;
     } catch (error) {
-        console.error("Error calling Gemini API for calculation:", error);
-        throw new Error("Formül önizlemesi hesaplanırken bir hata oluştu.");
+        endTimer();
+        console.error("Error in calculateFormula:", error);
+        
+        if (error instanceof TimeoutError) {
+            return '#ZAMAN_ASIMI!'; // Return Excel-like error for timeout
+        }
+        
+        if (error instanceof AIServiceError && error.retryable) {
+            return '#HATA!'; // Return Excel-like error for retryable errors
+        }
+        
+        // For non-retryable errors, show a more specific error
+        throw new AIServiceError(
+            "Formül önizlemesi hesaplanırken bir hata oluştu.",
+            'CALCULATION_ERROR',
+            false,
+            error instanceof Error ? error : undefined
+        );
     }
 }
 

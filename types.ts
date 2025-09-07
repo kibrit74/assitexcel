@@ -77,3 +77,97 @@ export interface ColumnAnalysis {
 
 export type SheetData = (string | number | null | Date)[][];
 export type WorkbookData = { [sheetName: string]: SheetData };
+
+// User Management Types
+export interface User {
+  id: string;
+  email: string;
+  fullName: string;
+  createdAt: Date;
+  lastLogin?: Date;
+  profileImage?: string;
+  membershipPlan: MembershipPlan;
+  credits: number;
+  maxCredits: number;
+}
+
+export interface UserPreferences {
+  language: 'tr' | 'en';
+  theme: 'light' | 'dark';
+  emailNotifications: boolean;
+  autoSaveHistory: boolean;
+}
+
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  type: 'free' | 'premium' | 'pro';
+  monthlyCredits: number;
+  price: number;
+  currency: string;
+  features: string[];
+  isActive: boolean;
+}
+
+export interface SavedFormula {
+  id: string;
+  title: string;
+  formula: string;
+  description: string;
+  category: string;
+  createdAt: Date;
+  lastUsed?: Date;
+  tags: string[];
+  isFavorite: boolean;
+}
+
+export interface SavedMacro {
+  id: string;
+  title: string;
+  code: string;
+  description: string;
+  category: string;
+  createdAt: Date;
+  lastUsed?: Date;
+  tags: string[];
+  isFavorite: boolean;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  fullName: string;
+  confirmPassword: string;
+}
+
+export interface PasswordResetData {
+  email: string;
+}
+
+export interface UpdateProfileData {
+  fullName?: string;
+  email?: string;
+  profileImage?: string;
+  preferences?: Partial<UserPreferences>;
+}
+
+// FAQ Types
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  category: 'general' | 'formulas' | 'macros' | 'membership' | 'technical';
+  isExpanded?: boolean;
+}

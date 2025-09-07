@@ -206,10 +206,10 @@ export const AnimatedFilterXmlSVG = () => {
             {/* XML/HTML Source */}
             <g transform="translate(10, 40)">
                 <rect width="110" height="100" fill="#f1f5f9" stroke="#94a3b8"/>
-                <text x="5" y="15" style={{...formulaTextStyle, fontSize: '7px'}}>&lt;veri&gt;</text>
-                <text x="15" y="30" style={{...formulaTextStyle, fontSize: '7px'}}>&lt;ürün&gt;Elma&lt;/ürün&gt;</text>
-                <text x="15" y="45" style={{...formulaTextStyle, fontSize: '7px'}}>&lt;fiyat&gt;<tspan style={{fill: step >= 1 ? '#ef4444' : '#475569', fontWeight: 'bold'}}>150</tspan>&lt;/fiyat&gt;</text>
-                <text x="5" y="60" style={{...formulaTextStyle, fontSize: '7px'}}>&lt;/veri&gt;</text>
+                <text x="5" y="15" style={{...formulaTextStyle, fontSize: '7px'}}>{'<'}veri{'>'}</text>
+                <text x="15" y="30" style={{...formulaTextStyle, fontSize: '7px'}}>{'<'}ürün{'>'}Elma{'<'}/ürün{'>'}</text>
+                <text x="15" y="45" style={{...formulaTextStyle, fontSize: '7px'}}>{'<'}fiyat{'>'}<tspan style={{fill: step >= 1 ? '#ef4444' : '#475569', fontWeight: 'bold'}}>150</tspan>{'<'}/fiyat{'>'}</text>
+                <text x="5" y="60" style={{...formulaTextStyle, fontSize: '7px'}}>{'<'}/veri{'>'}</text>
             </g>
 
              {/* Excel Cell */}
@@ -527,7 +527,7 @@ export const AnimatedIfSVG = () => {
             <g style={{ opacity: isChecking ? 1 : 0, transition: 'opacity 0.3s' }}>
                 <path d="M 100 50 v 15" stroke="#94a3b8" strokeDasharray="2,2" />
                 <rect x="70" y="65" width="60" height="20" fill="#f1f5f9" stroke="#94a3b8" rx="10"/>
-                <text x="100" y="79" textAnchor="middle" style={commonTextStyle}>Not > 50?</text>
+                <text x="100" y="79" textAnchor="middle" style={commonTextStyle}>Not {'>'} 50?</text>
             </g>
 
             {/* True/False Paths */}
@@ -1053,13 +1053,13 @@ export const AnimatedIfsSVG = () => {
             <StepIndicator current={step} total={5} />
             <text x="10" y="40" style={commonTextStyle}>Puan: {val}</text>
             
-            <text x="10" y="60" style={{...commonTextStyle, fill: step === 1 ? '#ef4444' : '#a1a1aa'}}>1. {val}>90? → YANLIŞ</text>
+            <text x="10" y="60" style={{...commonTextStyle, fill: step === 1 ? '#ef4444' : '#a1a1aa'}}>1. {val}{'>'} 90? → YANLIŞ</text>
             <path d="M 80 55 H 180" stroke="#ef4444" strokeWidth="1.5" style={{opacity: step === 1 ? 1 : 0}} />
             
-            <text x="10" y="80" style={{...commonTextStyle, fill: step === 2 ? '#16a34a' : '#a1a1aa'}}>2. {val}>80? → DOĞRU</text>
+            <text x="10" y="80" style={{...commonTextStyle, fill: step === 2 ? '#16a34a' : '#a1a1aa'}}>2. {val}{'>'} 80? → DOĞRU</text>
             <path d="M 80 75 H 180" stroke="#16a34a" strokeWidth="1.5" style={{opacity: step === 2 ? 1 : 0}} />
 
-            <text x="10" y="100" style={{...commonTextStyle, fill:'#a1a1aa', opacity: step >= 3 ? 0.3 : 1}}>3. {val}>70? ...</text>
+            <text x="10" y="100" style={{...commonTextStyle, fill:'#a1a1aa', opacity: step >= 3 ? 0.3 : 1}}>3. {val}{'>'} 70? ...</text>
 
             <rect x="140" y="120" width="40" height="20" fill="#f0fdf4" stroke="#22c55e" style={{opacity: step >= 3 ? 1 : 0}} />
             <text x="160" y="134" textAnchor="middle" style={{...commonTextStyle, fontWeight: 'bold', opacity: step >= 4 ? 1 : 0}}> "B" </text>
@@ -1718,7 +1718,7 @@ export const AnimatedMacroHighlightConditionalSVG = () => {
             <text x="10" y="30" style={{...commonTextStyle, opacity: step === 0 ? 1:0}}>1. Alan seçilir</text>
 
             <rect x="50" y="130" width="100" height="15" fill="#f1f5f9" stroke="#94a3b8" style={{opacity: step === 1 ? 1 : 0, transition: 'opacity 0.3s'}}/>
-            <text x="100" y="141" textAnchor="middle" style={{...commonTextStyle, opacity: step === 1 ? 1 : 0, transition: 'opacity 0.3s'}}>Koşul: Değer > 100</text>
+            <text x="100" y="141" textAnchor="middle" style={{...commonTextStyle, opacity: step === 1 ? 1 : 0, transition: 'opacity 0.3s'}}>Koşul: Değer {'>'} 100</text>
              <text x="10" y="30" style={{...commonTextStyle, opacity: step === 1 ? 1:0}}>2. Koşul belirlenir</text>
 
              <text x="10" y="30" style={{...commonTextStyle, fill: '#ca8a04', opacity: step === 2 ? 1:0}}>3. Hücreler vurgulanır</text>
