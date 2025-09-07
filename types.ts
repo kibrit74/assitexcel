@@ -163,6 +163,27 @@ export interface UpdateProfileData {
   preferences?: Partial<UserPreferences>;
 }
 
+// Database History Types  
+export interface DatabaseHistoryItem {
+  id: string;
+  user_id: string;
+  prompt: string;
+  result_type: 'formula' | 'macro' | 'web_search';
+  result_data: string; // JSON stringified AppResult
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserHistory {
+  id: string;
+  userId: string;
+  prompt: string;
+  resultType: 'formula' | 'macro' | 'web_search';
+  resultData: AppResult;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // FAQ Types
 export interface FAQItem {
   id: string;

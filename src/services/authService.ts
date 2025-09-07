@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import bcrypt from 'bcryptjs'
+import { DatabaseHistoryItem, UserHistory, AppResult } from '../../types'
 
 export interface LoginCredentials {
   email: string
@@ -168,5 +169,114 @@ export class AuthService {
     // Şimdilik sadece simulasyon
     console.log('Password reset requested for:', email)
     return true
+  }
+
+  // Geçmiş kaydetme
+  static async saveHistory(userId: string, prompt: string, result: AppResult): Promise<UserHistory> {
+    try {
+      const historyItem: Omit<DatabaseHistoryItem, 'id' | 'created_at' | 'updated_at'> = {
+        user_id: userId,
+        prompt: prompt,
+        result_type: result.type,
+        result_data: JSON.stringify(result.data)
+      }
+
+      const { data, error } = await supabase
+        .from('user_history')
+        .insert(historyItem)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error saving history:', error)
+        throw new Error('Geçmiş kaydedilirken hata oluştu: ' + error.message)
+      }
+
+      // Database formatından UI formatına çevir
+      const userHistory: UserHistory = {
+        id: data.id,
+        userId: data.user_id,
+        prompt: data.prompt,
+        resultType: data.result_type,
+        resultData: { type: data.result_type, data: JSON.parse(data.result_data) },
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at)
+      }
+
+      return userHistory
+    } catch (error) {
+      console.error('Save history error:', error)
+      throw error
+    }
+  }
+
+  // Kullanıcı geçmişini getir
+  static async getUserHistory(userId: string): Promise<UserHistory[]> {
+    try {
+      const { data, error } = await supabase
+        .from('user_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50) // Son 50 kayıt
+
+      if (error) {
+        console.error('Error fetching history:', error)
+        throw new Error('Geçmiş getirilirken hata oluştu: ' + error.message)
+      }
+
+      // Database formatından UI formatına çevir
+      const userHistory: UserHistory[] = data.map(item => ({
+        id: item.id,
+        userId: item.user_id,
+        prompt: item.prompt,
+        resultType: item.result_type,
+        resultData: { type: item.result_type, data: JSON.parse(item.result_data) },
+        createdAt: new Date(item.created_at),
+        updatedAt: new Date(item.updated_at)
+      }))
+
+      return userHistory
+    } catch (error) {
+      console.error('Get user history error:', error)
+      throw error
+    }
+  }
+
+  // Geçmiş öğesi silme
+  static async deleteHistoryItem(userId: string, historyId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('user_history')
+        .delete()
+        .eq('id', historyId)
+        .eq('user_id', userId) // Güvenlik için kullanıcı kontrolü
+
+      if (error) {
+        console.error('Error deleting history item:', error)
+        throw new Error('Geçmiş öğesi silinirken hata oluştu: ' + error.message)
+      }
+    } catch (error) {
+      console.error('Delete history item error:', error)
+      throw error
+    }
+  }
+
+  // Tüm geçmişi temizle
+  static async clearUserHistory(userId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('user_history')
+        .delete()
+        .eq('user_id', userId)
+
+      if (error) {
+        console.error('Error clearing history:', error)
+        throw new Error('Geçmiş temizlenirken hata oluştu: ' + error.message)
+      }
+    } catch (error) {
+      console.error('Clear history error:', error)
+      throw error
+    }
   }
 }

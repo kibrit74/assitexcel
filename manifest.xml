@@ -16,15 +16,15 @@
   <Description DefaultValue="AI destekli Excel formül ve makro yardımcısı"/>
   
   <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
-  <IconUrl DefaultValue="https://localhost:5173/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://localhost:5173/icon-64.png" />
+  <IconUrl DefaultValue="https://assitexcel.vercel.app/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://assitexcel.vercel.app/icon-64.png" />
   
   <!-- Support URL -->
-  <SupportUrl DefaultValue="https://localhost:5173/help" />
+  <SupportUrl DefaultValue="https://assitexcel.vercel.app/help" />
   
   <!-- Domains that will be allowed when navigating. For this template, only one domain is used and it's set to the host URL. -->
   <AppDomains>
-    <AppDomain>https://localhost:5173</AppDomain>
+    <AppDomain>https://assitexcel.vercel.app</AppDomain>
   </AppDomains>
   
   <!-- Begin TaskPane Mode integration. This section is used if there are no VersionOverrides or if the Office client version does not support add-in commands. -->
@@ -33,7 +33,7 @@
   </Hosts>
   
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://localhost:5173" />
+    <SourceLocation DefaultValue="https://assitexcel.vercel.app" />
   </DefaultSettings>
   <!-- End TaskPane Mode integration.  -->
   
@@ -98,12 +98,12 @@
     <!-- You can use resources across hosts and form factors. -->
     <Resources>
       <bt:Images>
-        <bt:Image id="ExcelBotAI.Icon16" DefaultValue="https://localhost:5173/icon-16.png" />
-        <bt:Image id="ExcelBotAI.Icon32" DefaultValue="https://localhost:5173/icon-32.png" />
-        <bt:Image id="ExcelBotAI.Icon80" DefaultValue="https://localhost:5173/icon-80.png" />
+        <bt:Image id="ExcelBotAI.Icon16" DefaultValue="https://assitexcel.vercel.app/icon-16.png" />
+        <bt:Image id="ExcelBotAI.Icon32" DefaultValue="https://assitexcel.vercel.app/icon-32.png" />
+        <bt:Image id="ExcelBotAI.Icon80" DefaultValue="https://assitexcel.vercel.app/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="ExcelBotAI.Taskpane.Url" DefaultValue="https://localhost:5173" />
+        <bt:Url id="ExcelBotAI.Taskpane.Url" DefaultValue="https://assitexcel.vercel.app" />
       </bt:Urls>
       <!-- ShortStrings max characters==125. -->
       <bt:ShortStrings>

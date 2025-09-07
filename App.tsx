@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import type { WorkbookData, ColumnAnalysis, AppResult, HistoryItem, LoginCredentials, RegisterData } from './types';
+import type { WorkbookData, ColumnAnalysis, AppResult, HistoryItem, LoginCredentials, RegisterData, UserHistory } from './types';
 import { generateFormula, analyzeExcelData, generateMacro, generateWebSearchStream, calculateFormula } from './services/geminiService';
 import { RequestManager } from './services/enhancedAIService';
 import { ResultDisplay } from './components/ResultDisplay';
@@ -190,6 +190,7 @@ const App: React.FC = () => {
     const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [databaseHistory, setDatabaseHistory] = useState<UserHistory[]>([]);
     const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
     const [isHelpCenterModalOpen, setIsHelpCenterModalOpen] = useState(false);
     const [useWebSearch, setUseWebSearch] = useState(false);
@@ -216,8 +217,19 @@ const App: React.FC = () => {
         const user = AuthService.getCurrentUser();
         if (user) {
             setCurrentUser(user);
+            loadUserHistory(user.id);
         }
     }, []);
+
+    // Load user history from database
+    const loadUserHistory = async (userId: string) => {
+        try {
+            const userHistory = await AuthService.getUserHistory(userId);
+            setDatabaseHistory(userHistory);
+        } catch (error) {
+            console.error('Failed to load user history:', error);
+        }
+    };
 
 
     const PlusCircleIcon = () => (
@@ -325,6 +337,7 @@ const App: React.FC = () => {
             const user = await AuthService.login(credentials);
             console.log('Login successful:', user);
             setCurrentUser(user);
+            await loadUserHistory(user.id);
             setCurrentView('profile'); // Redirect to profile after successful login
         } catch (err) {
             setAuthError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
@@ -818,6 +831,17 @@ const App: React.FC = () => {
                     setResult(newResult);
                     const newHistoryItem: HistoryItem = { prompt: userPrompt, result: newResult };
                     setHistory(prevHistory => [newHistoryItem, ...prevHistory].slice(0, 20));
+                    
+                    // Save to database if user is logged in
+                    if (currentUser) {
+                        try {
+                            const savedHistory = await AuthService.saveHistory(currentUser.id, userPrompt, newResult);
+                            setDatabaseHistory(prev => [savedHistory, ...prev]);
+                        } catch (error) {
+                            console.error('Failed to save history to database:', error);
+                            // Don't fail the main flow if database save fails
+                        }
+                    }
                 }
 
             } catch (err: any) {
@@ -1211,6 +1235,7 @@ const App: React.FC = () => {
             <AccessibilityProvider>
                 <UserProfilePage
                     user={currentUser}
+                    userHistory={databaseHistory}
                     onUpdateProfile={handleUpdateProfile}
                     onLogout={handleLogout}
                     onNavigateToApp={handleNavigateToApp}
@@ -1219,6 +1244,30 @@ const App: React.FC = () => {
                     onViewChange={setCurrentView}
                     onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                     onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    onUseHistoryItem={(result) => {
+                        setResult(result);
+                        setCurrentView('app');
+                    }}
+                    onDeleteHistoryItem={async (historyId) => {
+                        if (currentUser) {
+                            try {
+                                await AuthService.deleteHistoryItem(currentUser.id, historyId);
+                                setDatabaseHistory(prev => prev.filter(h => h.id !== historyId));
+                            } catch (error) {
+                                console.error('Failed to delete history item:', error);
+                            }
+                        }
+                    }}
+                    onClearHistory={async () => {
+                        if (currentUser && confirm('Tüm geçmişi silmek istediğinizden emin misiniz?')) {
+                            try {
+                                await AuthService.clearUserHistory(currentUser.id);
+                                setDatabaseHistory([]);
+                            } catch (error) {
+                                console.error('Failed to clear history:', error);
+                            }
+                        }
+                    }}
                 />
                 
                 {/* Global Modals */}
