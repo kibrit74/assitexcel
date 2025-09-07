@@ -105,20 +105,16 @@ const ChevronDownIcon = () => (
 );
 
 const ExcelLogo = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    {/* Excel file background */}
-    <rect x="3" y="2" width="15" height="20" rx="2" ry="2" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
-    {/* Corner fold */}
-    <path d="M15 2v4a2 2 0 0 0 2 2h4" fill="none" stroke="#16a34a" strokeWidth="1.5"/>
-    {/* Grid lines */}
-    <line x1="6" y1="8" x2="15" y2="8" stroke="#16a34a" strokeWidth="0.8"/>
-    <line x1="6" y1="12" x2="15" y2="12" stroke="#16a34a" strokeWidth="0.8"/>
-    <line x1="6" y1="16" x2="15" y2="16" stroke="#16a34a" strokeWidth="0.8"/>
-    <line x1="9" y1="6" x2="9" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
-    <line x1="12" y1="6" x2="12" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
-    {/* Excel X symbol */}
-    <path d="M7 10l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M13 14l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8" strokeLinejoin="round"/>
+    <path d="M14 2v6h6" fill="none" stroke="#10b981" strokeWidth="1.6" strokeLinejoin="round"/>
+    <g stroke="#10b981" strokeWidth="1.2" opacity="0.8">
+      <path d="M16 13H8M16 17H8M10 9H8"/>
+    </g>
+    <g fill="#10b981" opacity="0.6">
+      <circle cx="9" cy="13" r="0.8"/>
+      <circle cx="9" cy="17" r="0.8"/>
+    </g>
   </svg>
 );
 

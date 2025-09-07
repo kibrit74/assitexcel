@@ -12,6 +12,7 @@ import { HelpCenterModal } from './components/HelpCenterModal';
 import { ExampleDetailModal } from './components/ExampleDetailModal';
 import { helpContent } from './data/helpContent';
 import LandingPage from './components/LandingPage';
+import AboutPage from './components/AboutPage';
 import { ModernNavbar } from './components/ModernNavbar';
 import { EnhancedExcelInterface } from './components/EnhancedExcelInterface';
 import { PerformanceMonitorComponent } from './components/PerformanceMonitor';
@@ -164,7 +165,7 @@ const App: React.FC = () => {
     // Responsive breakpoint support
     const { isMobile, isTablet, isDesktop, isSmall } = useBreakpoint();
     
-    const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
+    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings'>('landing');
     const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
     const [activeSheet, setActiveSheet] = useState<string>('');
     const [fileName, setFileName] = useState<string>('');
@@ -836,6 +837,93 @@ const App: React.FC = () => {
                     {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
                     
                     {/* Performance Monitor */}
+                    <PerformanceMonitorComponent />
+                </div>
+            </AccessibilityProvider>
+        );
+    }
+
+    // About page view
+    if (currentView === 'about') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen bg-slate-50">
+                    {/* Live region for screen reader announcements */}
+                    <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
+                    
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    />
+                    <AboutPage />
+                    
+                    {/* Global Modals */}
+                    {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                    {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                    
+                    {/* Performance Monitor */}
+                    <PerformanceMonitorComponent />
+                </div>
+            </AccessibilityProvider>
+        );
+    }
+
+    // Placeholder pages for other views
+    if (currentView === 'faq') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen bg-slate-50">
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    />
+                    <div className="max-w-4xl mx-auto py-12 px-4">
+                        <div className="text-center">
+                            <h1 className="text-4xl font-bold text-slate-800 mb-4 font-['Poppins',_sans-serif]">Sık Sorulan Sorular</h1>
+                            <p className="text-xl text-slate-600 font-['Inter',_sans-serif]">Bu sayfa yakında eklenecek...</p>
+                        </div>
+                    </div>
+                    
+                    {/* Global Modals */}
+                    {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                    {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                    
+                    <PerformanceMonitorComponent />
+                </div>
+            </AccessibilityProvider>
+        );
+    }
+
+    if (currentView === 'login' || currentView === 'register' || currentView === 'profile' || currentView === 'settings') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen bg-slate-50">
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    />
+                    <div className="max-w-4xl mx-auto py-12 px-4">
+                        <div className="text-center">
+                            <h1 className="text-4xl font-bold text-slate-800 mb-4 font-['Poppins',_sans-serif]">
+                                {currentView === 'login' && 'Giriş Yap'}
+                                {currentView === 'register' && 'Kayıt Ol'}
+                                {currentView === 'profile' && 'Profil'}
+                                {currentView === 'settings' && 'Ayarlar'}
+                            </h1>
+                            <p className="text-xl text-slate-600 font-['Inter',_sans-serif]">Bu sayfa yakında eklenecek...</p>
+                        </div>
+                    </div>
+                    
+                    {/* Global Modals */}
+                    {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                    {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                    
                     <PerformanceMonitorComponent />
                 </div>
             </AccessibilityProvider>
