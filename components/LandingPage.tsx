@@ -2,20 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 // Icons
 const ExcelIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {/* Excel file background */}
-        <rect x="3" y="2" width="15" height="20" rx="2" ry="2" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5"/>
-        {/* Corner fold */}
-        <path d="M15 2v4a2 2 0 0 0 2 2h4" fill="none" stroke="#16a34a" strokeWidth="1.5"/>
-        {/* Grid lines */}
-        <line x1="6" y1="8" x2="15" y2="8" stroke="#16a34a" strokeWidth="0.8"/>
-        <line x1="6" y1="12" x2="15" y2="12" stroke="#16a34a" strokeWidth="0.8"/>
-        <line x1="6" y1="16" x2="15" y2="16" stroke="#16a34a" strokeWidth="0.8"/>
-        <line x1="9" y1="6" x2="9" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
-        <line x1="12" y1="6" x2="12" y2="19" stroke="#16a34a" strokeWidth="0.8"/>
-        {/* Excel X symbol */}
-        <path d="M7 10l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M13 14l2 2m0-2l-2 2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8" strokeLinejoin="round"/>
+        <path d="M14 2v6h6" fill="none" stroke="#10b981" strokeWidth="1.6" strokeLinejoin="round"/>
+        <g stroke="#10b981" strokeWidth="1.2" opacity="0.8">
+            <path d="M16 13H8M16 17H8M10 9H8"/>
+        </g>
+        <g fill="#10b981" opacity="0.6">
+            <circle cx="9" cy="13" r="0.8"/>
+            <circle cx="9" cy="17" r="0.8"/>
+        </g>
     </svg>
 );
 
@@ -291,17 +287,47 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                         
                         {/* Feature highlights */}
                         <div className="flex flex-wrap items-center justify-center gap-4 mb-8 text-sm">
-                            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-emerald-200/50 shadow-sm">
-                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                                <span className="text-slate-700 font-semibold">🎬 Canlı Animasyonlu Anlatım</span>
+                            <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-emerald-200/50 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <rect x="2" y="3" width="20" height="12" rx="2" fill="#dcfce7" stroke="#10b981" strokeWidth="1.5"/>
+                                        <circle cx="12" cy="9" r="2" fill="#10b981" fillOpacity="0.3" stroke="#10b981" strokeWidth="1"/>
+                                        <path d="M11 8l1 1-1 1" stroke="#10b981" strokeWidth="1.5" fill="none"/>
+                                        <circle cx="6" cy="6" r="0.5" fill="#10b981" opacity="0.7">
+                                            <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+                                        </circle>
+                                        <circle cx="18" cy="12" r="0.5" fill="#10b981" opacity="0.5">
+                                            <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
+                                        </circle>
+                                    </svg>
+                                </div>
+                                <span className="text-slate-700 font-semibold">Canlı Animasyonlu Anlatım</span>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-200/50 shadow-sm">
-                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                <span className="text-slate-700 font-semibold">📚 Kapsamlı Yardım Merkezi</span>
+                            <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-emerald-200/50 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <rect x="4" y="3" width="12" height="16" rx="1" fill="#dcfce7" stroke="#10b981" strokeWidth="1.5"/>
+                                        <rect x="13" y="2" width="2" height="6" fill="#10b981" rx="0.3"/>
+                                        <path d="M14 8l0.5-0.5 0.5 0.5" fill="#dcfce7" stroke="#10b981" strokeWidth="0.5"/>
+                                        <line x1="6" y1="6" x2="12" y2="6" stroke="#10b981" strokeWidth="1" opacity="0.7"/>
+                                        <line x1="6" y1="9" x2="11" y2="9" stroke="#10b981" strokeWidth="1" opacity="0.7"/>
+                                        <line x1="6" y1="12" x2="12" y2="12" stroke="#10b981" strokeWidth="1" opacity="0.7"/>
+                                        <circle cx="13" cy="15" r="1.5" fill="#10b981" fillOpacity="0.2"/>
+                                        <path d="M12.5 15l0.5 0.5 1-1" stroke="#10b981" strokeWidth="1" fill="none"/>
+                                    </svg>
+                                </div>
+                                <span className="text-slate-700 font-semibold">Kapsamlı Yardım Merkezi</span>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200/50 shadow-sm">
-                                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                                <span className="text-slate-700 font-semibold">⚡ Anında Sonuç</span>
+                            <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-emerald-200/50 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14H4Z" fill="#dcfce7" stroke="#10b981" strokeWidth="1.5"/>
+                                        <path d="M8 4l2 3M16 20l-2-3" stroke="#10b981" strokeWidth="1" opacity="0.7"/>
+                                        <circle cx="13" cy="10" r="0.8" fill="#10b981"/>
+                                        <circle cx="11" cy="14" r="0.8" fill="#10b981"/>
+                                    </svg>
+                                </div>
+                                <span className="text-slate-700 font-semibold">Anında Sonuç</span>
                             </div>
                         </div>
 
@@ -396,8 +422,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                         {/* Example queries */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
                             {examples.map((example, index) => (
-                                <div key={index} className="bg-white/50 backdrop-blur-sm border border-slate-200/50 rounded-lg p-3 text-sm text-slate-600">
-                                    <span className="text-emerald-600">💡</span> {example}
+                                <div key={index} className="bg-white/60 backdrop-blur-sm border border-emerald-200/50 rounded-lg p-3 text-sm text-slate-600 hover:bg-white/80 hover:border-emerald-300/60 transition-all duration-200 hover:shadow-sm">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 flex-shrink-0">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                {/* Bulb shape */}
+                                                <path d="M12 2a7 7 0 0 1 5 11.9V17a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-3.1A7 7 0 0 1 12 2z" fill="#dcfce7" stroke="#10b981" strokeWidth="1.5"/>
+                                                {/* Bulb base */}
+                                                <rect x="9" y="18" width="6" height="2" rx="1" fill="#10b981" fillOpacity="0.3" stroke="#10b981" strokeWidth="1"/>
+                                                {/* Light rays */}
+                                                <g stroke="#10b981" strokeWidth="1.2" strokeLinecap="round" opacity="0.7">
+                                                    <path d="M12 1v1M4.2 4.2l.7.7M1 12h1M4.9 19.8l.7-.7M19.8 19.1l-.7-.7M23 12h-1M19.8 4.2l-.7.7"/>
+                                                </g>
+                                                {/* Inner glow */}
+                                                <circle cx="12" cy="9" r="3" fill="#10b981" fillOpacity="0.1"/>
+                                                <circle cx="10" cy="7" r="1" fill="#10b981" fillOpacity="0.4"/>
+                                            </svg>
+                                        </div>
+                                        <span className="flex-1">{example}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>

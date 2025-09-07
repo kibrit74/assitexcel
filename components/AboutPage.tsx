@@ -1,16 +1,91 @@
 import React from 'react';
 
+// Feature Icons
+const FeatureIcon = ({ children, bgColor = "bg-emerald-100", textColor = "text-emerald-600" }: { children: React.ReactNode; bgColor?: string; textColor?: string }) => (
+  <div className={`w-16 h-16 ${bgColor} rounded-2xl flex items-center justify-center ${textColor} shadow-lg`}>
+    {children}
+  </div>
+);
+
+const SmartMergeIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-10-5z"/>
+    <path d="M12 8v8"/>
+    <path d="M8 12h8"/>
+  </svg>
+);
+
+const CommissionIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+
+const AutoFillIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="3" width="7" height="7"/>
+    <rect x="14" y="3" width="7" height="7"/>
+    <rect x="14" y="14" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/>
+    <path d="M10 7h4"/>
+    <path d="M7 10v4"/>
+  </svg>
+);
+
+const CleanDataIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14,2 14,8 20,8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <path d="M10 9H8"/>
+  </svg>
+);
+
+const DateFormatIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+    <path d="M8 14h.01"/>
+    <path d="M12 14h.01"/>
+    <path d="M16 14h.01"/>
+    <path d="M8 18h.01"/>
+    <path d="M12 18h.01"/>
+  </svg>
+);
+
+const ConditionalColorIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+
 const AboutPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
-            Excel Formül Yardımcısı Hakkında
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl mb-6 shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <line x1="10" y1="9" x2="8" y2="9" />
+            </svg>
+          </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4 font-['Poppins',_sans-serif]">
+            ExcelBot AI
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Yapay zeka destekli Excel formül ve makro asistanınız
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto font-['Inter',_sans-serif] leading-relaxed">
+            Yapay zeka ile Excel'de çalışmak çok kolay! Türkçe açıklamanızı yazın, size özel formüller ve makrolar oluşturalım.
           </p>
         </div>
 
@@ -202,18 +277,127 @@ const AboutPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Features Overview */}
+          {/* Smart Features Section */}
+          <section className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-slate-800 mb-4 font-['Poppins',_sans-serif]">Akıllı Excel Özellikleri</h2>
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto font-['Inter',_sans-serif]">
+                AI destekli sistemimiz, Excel'de karşılaştığınız en yaygın problemleri anında çözüyor
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Sütunları Birleştir */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-emerald-100" textColor="text-emerald-600">
+                  <SmartMergeIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Ad ve soyadı sütunlarını birleştir</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  "A sütunundaki ad ile B sütunundaki soyadı birleştir" demeniz yeterli
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">= A2 & " " & B2</code>
+                </div>
+              </div>
+              
+              {/* Komisyon Hesaplama */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-blue-100" textColor="text-blue-600">
+                  <CommissionIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Satış verilerine göre komisyon hesapla</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Karmaşık komisyon kurallarını basit Türkçe ile açıklayın
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">= EĞER(C2>10000; C2*0.05; C2*0.03)</code>
+                </div>
+              </div>
+              
+              {/* Otomatik Doldur */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-purple-100" textColor="text-purple-600">
+                  <AutoFillIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Boş hücreleri otomatik doldur</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Eksik veri alanlarını akıllı kurallara göre otomatik tamamlayın
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">= EĞER(EBOŞSA(A2); "Veri Yok"; A2)</code>
+                </div>
+              </div>
+              
+              {/* Temizlik */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-orange-100" textColor="text-orange-600">
+                  <CleanDataIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Yinelenen kayıtları temizle</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Veri setinizdeki duplike kayıtları bulup temizleyen makrolar
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">VBA Makro Kodu</code>
+                </div>
+              </div>
+              
+              {/* Tarih Formatı */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-teal-100" textColor="text-teal-600">
+                  <DateFormatIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Tarih formatlarını düzenle</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Farklı tarih formatlarını standart hale getirin
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">= METNİ(A2; "gg.aa.yyyy")</code>
+                </div>
+              </div>
+              
+              {/* Koşullu Renklendirme */}
+              <div className="text-center group">
+                <FeatureIcon bgColor="bg-pink-100" textColor="text-pink-600">
+                  <ConditionalColorIcon />
+                </FeatureIcon>
+                <h3 className="text-lg font-semibold text-slate-800 mt-4 mb-2 font-['Inter',_sans-serif]">Koşullu renklendirme uygula</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Değerlere göre hücreleri otomatik renklendir
+                </p>
+                <div className="mt-3 bg-slate-50 rounded-lg px-3 py-2">
+                  <code className="text-xs text-slate-700 font-['JetBrains_Mono',_monospace]">Koşullu Biçimlendirme</code>
+                </div>
+              </div>
+            </div>
+            
+            {/* CTA Section */}
+            <div className="text-center mt-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-2xl p-8 text-white">
+              <h3 className="text-2xl font-bold mb-4 font-['Poppins',_sans-serif]">Hemen Deneyin!</h3>
+              <p className="text-lg mb-6 opacity-90 font-['Inter',_sans-serif]">
+                Excel dosyanızı yükleyin ve hangi işlemi yapmak istediğinizi Türkçe anlatın
+              </p>
+              <button className="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg font-['Inter',_sans-serif]">
+                Hemen Başlayın
+              </button>
+            </div>
+          </section>
+          
+          {/* Core Benefits */}
           <section className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-lg p-8 text-white">
-            <h2 className="text-3xl font-bold mb-6 text-center">Öne Çıkan Özellikler</h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <h2 className="text-3xl font-bold mb-8 text-center font-['Poppins',_sans-serif]">Neden ExcelBot AI?</h2>
+            <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Hızlı ve Güvenilir</h3>
-                <p className="text-slate-300">Saniyeler içinde doğru formüller ve makrolar üretin</p>
+                <h3 className="text-xl font-semibold mb-3 font-['Inter',_sans-serif]">⚡ Hızlı ve Güvenilir</h3>
+                <p className="text-slate-300 leading-relaxed font-['Inter',_sans-serif]">
+                  Saniyeler içinde doğru formüller ve makrolar üretin. Manuel araştırma yapmaya son!
+                </p>
               </div>
               
               <div className="text-center">
@@ -222,8 +406,10 @@ const AboutPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Öğrenirken Kullan</h3>
-                <p className="text-slate-300">Detaylı açıklamalar ile Excel bilginizi geliştirin</p>
+                <h3 className="text-xl font-semibold mb-3 font-['Inter',_sans-serif]">📚 Öğrenirken Kullanın</h3>
+                <p className="text-slate-300 leading-relaxed font-['Inter',_sans-serif]">
+                  Her formül detaylı açıklamasıyla gelir. Excel bilginizi geliştirirken iş yapın.
+                </p>
               </div>
               
               <div className="text-center">
@@ -232,8 +418,10 @@ const AboutPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Türkçe Odaklı</h3>
-                <p className="text-slate-300">Ana dilinizde sorunsuz Excel deneyimi</p>
+                <h3 className="text-xl font-semibold mb-3 font-['Inter',_sans-serif]">🇹🇷 Türkçe Odaklı</h3>
+                <p className="text-slate-300 leading-relaxed font-['Inter',_sans-serif]">
+                  Ana dilinizde Excel uzmanı desteği. İngilizce formül isimleri ezberlemek yok!
+                </p>
               </div>
             </div>
           </section>
