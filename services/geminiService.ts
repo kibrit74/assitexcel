@@ -116,6 +116,7 @@ const analysisSchema = {
     }
 };
 
+
 export const analyzeExcelData = async (workbookData: WorkbookData): Promise<ColumnAnalysis[]> => {
     const endTimer = PerformanceMonitor.startTimer('analyzeExcelData');
     
@@ -207,6 +208,7 @@ const responseSchema = {
         type: { type: Type.STRING },
         complexity: { type: Type.STRING },
       },
+      required: ['source', 'target', 'type', 'complexity'],
     },
     formula: {
       type: Type.OBJECT,
@@ -214,6 +216,7 @@ const responseSchema = {
         code: { type: Type.STRING },
         description: { type: Type.STRING },
       },
+      required: ['code', 'description'],
     },
     guide: {
       type: Type.OBJECT,
@@ -224,6 +227,7 @@ const responseSchema = {
         },
         tip: { type: Type.STRING },
       },
+      required: ['steps', 'tip'],
     },
     example: {
       type: Type.OBJECT,
@@ -231,6 +235,7 @@ const responseSchema = {
         scenario: { type: Type.STRING },
         result: { type: Type.STRING },
       },
+      required: ['scenario', 'result'],
     },
     warnings: {
       type: Type.ARRAY,
@@ -240,9 +245,11 @@ const responseSchema = {
           error: { type: Type.STRING },
           solution: { type: Type.STRING },
         },
+        required: ['error', 'solution'],
       },
     },
   },
+  required: ['analysis', 'formula', 'guide', 'example', 'warnings'],
 };
 
 const formatAnalysisForPrompt = (analysis: ColumnAnalysis[]): string => {
@@ -610,7 +617,7 @@ Sen, bir Excel formül hesaplama motorusun. Görevin, sağlanan veri bağlamına
 
 Örnek Çıktılar:
 - 42
-- Ahmet Yılmaz
+- İsim Soyisim
 - 15.03.2024
 - #YOK!
 - DOĞRU

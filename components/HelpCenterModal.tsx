@@ -258,8 +258,26 @@ export const HelpCenterModal: React.FC<HelpCenterModalProps> = ({ isOpen, onClos
                     onClick={e => e.stopPropagation()}
                 >
                     <header className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 gap-4">
-                        <h2 id="help-title" className="text-xl font-bold text-slate-800 flex items-center gap-2 flex-shrink-0">
-                            📚 Excel Yardım Merkezi
+                        <h2 id="help-title" className="text-xl font-bold text-slate-800 flex items-center gap-3 flex-shrink-0">
+                            <div className="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    {/* Book pages */}
+                                    <rect x="4" y="3" width="14" height="18" rx="1" fill="#dcfce7" stroke="#10b981" strokeWidth="1.6"/>
+                                    <rect x="6" y="3" width="12" height="18" rx="1" fill="#f0fdf4" stroke="#10b981" strokeWidth="1.2" strokeDasharray="0,2"/>
+                                    {/* Bookmark */}
+                                    <rect x="15" y="2" width="3" height="8" fill="#10b981" rx="0.5"/>
+                                    <path d="M16.5 10l1-1 1 1" fill="#dcfce7" stroke="#10b981" strokeWidth="0.8"/>
+                                    {/* Text lines */}
+                                    <line x1="7" y1="7" x2="14" y2="7" stroke="#10b981" strokeWidth="1.2" opacity="0.7"/>
+                                    <line x1="7" y1="10" x2="13" y2="10" stroke="#10b981" strokeWidth="1.2" opacity="0.7"/>
+                                    <line x1="7" y1="13" x2="15" y2="13" stroke="#10b981" strokeWidth="1.2" opacity="0.7"/>
+                                    <line x1="7" y1="16" x2="11" y2="16" stroke="#10b981" strokeWidth="1.2" opacity="0.7"/>
+                                    {/* Checkmark for completed sections */}
+                                    <circle cx="16" cy="16" r="2" fill="#10b981" fillOpacity="0.2"/>
+                                    <path d="M15 16l1 1 2-2" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                                </svg>
+                            </div>
+                            Excel Yardım Merkezi
                         </h2>
                         <div className="relative flex-grow max-w-lg">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">

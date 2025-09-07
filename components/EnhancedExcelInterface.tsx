@@ -119,6 +119,7 @@ interface EnhancedExcelInterfaceProps {
   activeSheet: string;
   onSheetChange: (sheetName: string) => void;
   onCellAppend?: (rowIndex: number, colIndex: number) => void;
+  onCellClick?: (rowIndex: number, colIndex: number) => void;
   livePreviewFormula?: string | null;
   liveFormulaCell?: LivePreviewCell | null;
   showDataTypes?: boolean;
@@ -133,6 +134,7 @@ export const EnhancedExcelInterface: React.FC<EnhancedExcelInterfaceProps> = ({
   activeSheet,
   onSheetChange,
   onCellAppend,
+  onCellClick,
   livePreviewFormula,
   liveFormulaCell,
   showDataTypes = true,
@@ -231,13 +233,19 @@ export const EnhancedExcelInterface: React.FC<EnhancedExcelInterfaceProps> = ({
 
   // Selection handlers
   const handleCellMouseDown = useCallback((rowIndex: number, colIndex: number) => {
-    setIsSelecting(true);
-    setSelectionMode('cell');
-    setSelection({
-      start: { row: rowIndex, col: colIndex },
-      end: { row: rowIndex, col: colIndex }
-    });
-  }, []);
+    // If in live preview mode and onCellClick is provided, call it
+    if (livePreviewFormula && onCellClick) {
+      onCellClick(rowIndex, colIndex);
+    } else {
+      // Otherwise, handle normal selection
+      setIsSelecting(true);
+      setSelectionMode('cell');
+      setSelection({
+        start: { row: rowIndex, col: colIndex },
+        end: { row: rowIndex, col: colIndex }
+      });
+    }
+  }, [livePreviewFormula, onCellClick]);
 
   const handleMouseOverTable = useCallback((rowIndex: number, colIndex: number) => {
     if (isSelecting && selection.start) {

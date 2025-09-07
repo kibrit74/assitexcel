@@ -10,20 +10,42 @@ JSON array döndür: [{"sheetName":"", "column":"", "description":""}]
 `;
 
 export const FAST_FORMULA_PROMPT = `
-Excel uzmanı olarak:
+Excel uzmanı olarak tam formül çözümü üret. Önemli: TUM ALANLAR DOLDURULMALI!
+
 1. Kullanıcı isteğini analiz et
 2. Veri yapısına uygun formül oluştur  
 3. Türkçe Excel için: EĞER, DÜŞEYARA, noktalı virgül
 4. İngilizce Excel için: IF, VLOOKUP, virgül
 
-SADECE JSON döndür:
+SADECE bu JSON yapısını döndür (tüm alanlar zorunlu):
 {
-  "analysis": {"source": "Kaynak", "target": "Hedef", "type": "İşlem türü", "complexity": "Zorluk"},
-  "formula": {"code": "=FORMÜL", "description": "Ne yapar"},
-  "guide": {"steps": ["Adım 1", "Adım 2"], "tip": "İpucu"},
-  "example": {"scenario": "Örnek durum", "result": "Sonuç"},
-  "warnings": [{"error": "Hata", "solution": "Çözüm"}]
+  "analysis": {
+    "source": "Kaynak veri konumu (sonuç sütunu)",
+    "target": "Hedef konum (formülün uygulanacağı yer)", 
+    "type": "İşlem türü (hesaplama/arama/birleştirme vb.)",
+    "complexity": "Zorluk seviyesi (Kolay/Orta/Zor)"
+  },
+  "formula": {
+    "code": "=FORMÜL_KODU (= ile başlamalı)", 
+    "description": "Formülün ne yaptığının açıklaması"
+  },
+  "guide": {
+    "steps": ["Adım 1: Detaylı talimat", "Adım 2: Detaylı talimat", "Adım 3: Detaylı talimat"],
+    "tip": "Kullanım ipucu veya önerisi"
+  },
+  "example": {
+    "scenario": "Örnek kullanım senaryosu açıklaması",
+    "result": "Beklenen sonuç örneği"
+  },
+  "warnings": [
+    {
+      "error": "Potansiyel hata durumu",
+      "solution": "Hatanın nasıl çözüleğinin açıklaması"
+    }
+  ]
 }
+
+Dikkat: Tüm alanları doldur, boş bırakma! Analysis, formula, guide, example ve warnings alanları zorunludur.
 `;
 
 export const FAST_MACRO_PROMPT = `

@@ -143,7 +143,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({
                   className={`block w-full pl-10 pr-3 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
                     validationErrors.fullName ? 'border-red-300' : 'border-slate-300'
                   }`}
-                  placeholder=\"Ahmet Yılmaz\"
+                  placeholder="İsim Soyisim"
                 />
               </div>
               {validationErrors.fullName && (

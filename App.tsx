@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import type { WorkbookData, ColumnAnalysis, AppResult, HistoryItem } from './types';
+import type { WorkbookData, ColumnAnalysis, AppResult, HistoryItem, LoginCredentials, RegisterData } from './types';
 import { generateFormula, analyzeExcelData, generateMacro, generateWebSearchStream, calculateFormula } from './services/geminiService';
 import { RequestManager } from './services/enhancedAIService';
 import { ResultDisplay } from './components/ResultDisplay';
@@ -13,9 +13,16 @@ import { ExampleDetailModal } from './components/ExampleDetailModal';
 import { helpContent } from './data/helpContent';
 import LandingPage from './components/LandingPage';
 import AboutPage from './components/AboutPage';
+import FAQ from './components/FAQ';
+import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
+import UserProfilePage from './components/UserProfilePage';
+import ExcelOutputGuidePage from './components/ExcelOutputGuidePage';
 import { ModernNavbar } from './components/ModernNavbar';
+import EnhancedNavbar from './components/EnhancedNavbar';
 import { EnhancedExcelInterface } from './components/EnhancedExcelInterface';
 import { PerformanceMonitorComponent } from './components/PerformanceMonitor';
+import ModernFooter from './components/ModernFooter';
 import AccessibilityProvider, { 
     AccessibleButton, 
     LiveRegion, 
@@ -165,7 +172,7 @@ const App: React.FC = () => {
     // Responsive breakpoint support
     const { isMobile, isTablet, isDesktop, isSmall } = useBreakpoint();
     
-    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings'>('landing');
+    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings' | 'excel-guide'>('landing');
     const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
     const [activeSheet, setActiveSheet] = useState<string>('');
     const [fileName, setFileName] = useState<string>('');
@@ -196,6 +203,11 @@ const App: React.FC = () => {
     const [selectionMode, setSelectionMode] = useState<'cell' | 'row' | 'column'>('cell');
     const abortControllerRef = useRef<AbortController | null>(null);
     const [trustedFormulaLibrary, setTrustedFormulaLibrary] = useState<{ prompt: string; formula: string }[]>([]);
+    
+    // Authentication state
+    const [authLoading, setAuthLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<any | null>(null);
 
 
     const PlusCircleIcon = () => (
@@ -292,6 +304,208 @@ const App: React.FC = () => {
             const newLibrary = [newItem, ...prev].slice(0, 50); // Keep library size reasonable
             return newLibrary;
         });
+    };
+
+    // Authentication handlers
+    const handleLogin = async (credentials: LoginCredentials): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Demo credentials check
+            if (credentials.email === 'demo@example.com' && credentials.password === 'demo123') {
+                console.log('Login successful:', credentials);
+                // Set mock user data
+                setCurrentUser({
+                    id: '1',
+                    fullName: 'Demo Kullanıcı',
+                    email: credentials.email,
+                    createdAt: new Date(),
+                    lastLogin: new Date(),
+                    membershipPlan: {
+                        id: '1',
+                        name: 'Ücretsiz Plan',
+                        type: 'free',
+                        monthlyCredits: 100,
+                        price: 0,
+                        currency: 'TRY',
+                        features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
+                        isActive: true
+                    },
+                    credits: 90,
+                    maxCredits: 100
+                });
+                setCurrentView('profile'); // Redirect to profile after successful login
+            } else {
+                throw new Error('Geçersiz e-posta adresi veya şifre');
+            }
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
+            throw err; // Re-throw to let the component handle it
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    const handleSignup = async (userData: RegisterData): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Check for existing email (mock validation)
+            if (userData.email === 'existing@example.com') {
+                throw new Error('Bu e-posta adresi zaten kullanılıyor');
+            }
+            
+            console.log('Signup successful:', userData);
+            // Set mock user data for new signup
+            setCurrentUser({
+                id: '4',
+                fullName: userData.fullName,
+                email: userData.email,
+                createdAt: new Date(),
+                lastLogin: null,
+                membershipPlan: {
+                    id: '1',
+                    name: 'Ücretsiz Plan',
+                    type: 'free',
+                    monthlyCredits: 100,
+                    price: 0,
+                    currency: 'TRY',
+                    features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
+                    isActive: true
+                },
+                credits: 100,
+                maxCredits: 100
+            });
+            setCurrentView('profile'); // Redirect to profile after successful signup
+            setAuthError(null);
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Hesap oluşturulurken bir hata oluştu');
+            throw err; // Re-throw to let the component handle it
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    const handleForgotPassword = (email: string): void => {
+        console.log('Password reset requested for:', email);
+        setAuthError(null);
+        // For now, just show a simple alert
+        alert(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi.`);
+    };
+    
+    const handleGoogleLogin = async (): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Simulate Google OAuth flow
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            console.log('Google login successful');
+            // Set mock user data for Google login
+            setCurrentUser({
+                id: '2',
+                fullName: 'Google Kullanıcı',
+                email: 'google@example.com',
+                createdAt: new Date(),
+                lastLogin: new Date(),
+                membershipPlan: {
+                    id: '1',
+                    name: 'Ücretsiz Plan',
+                    type: 'free',
+                    monthlyCredits: 100,
+                    price: 0,
+                    currency: 'TRY',
+                    features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
+                    isActive: true
+                },
+                credits: 95,
+                maxCredits: 100
+            });
+            setCurrentView('profile'); // Redirect to profile after successful login
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Google ile giriş yapılırken bir hata oluştu');
+            throw err;
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    const handleGoogleSignup = async (): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Simulate Google OAuth flow
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            console.log('Google signup successful');
+            // Set mock user data for Google signup
+            setCurrentUser({
+                id: '3',
+                fullName: 'Yeni Google Kullanıcı',
+                email: 'newgoogle@example.com',
+                createdAt: new Date(),
+                lastLogin: null,
+                membershipPlan: {
+                    id: '1',
+                    name: 'Ücretsiz Plan',
+                    type: 'free',
+                    monthlyCredits: 100,
+                    price: 0,
+                    currency: 'TRY',
+                    features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
+                    isActive: true
+                },
+                credits: 100,
+                maxCredits: 100
+            });
+            setCurrentView('profile'); // Redirect to profile after successful signup
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Google ile kayıt olurken bir hata oluştu');
+            throw err;
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    // Profile page handlers
+    const handleUpdateProfile = async (data: any): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Update current user
+            setCurrentUser(prev => ({ ...prev, ...data }));
+            console.log('Profile updated:', data);
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Profil güncelleme sırasında bir hata oluştu');
+            throw err;
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    const handleLogout = () => {
+        setCurrentUser(null);
+        setAuthError(null);
+        setCurrentView('landing');
+        console.log('User logged out');
+    };
+    
+    const handleNavigateToApp = () => {
+        setCurrentView('app');
     };
 
     const handleCellClickForPreview = async (rowIndex: number, colIndex: number) => {
@@ -814,11 +1028,12 @@ const App: React.FC = () => {
     };
 
 
+
     // Landing page view
     if (currentView === 'landing') {
         return (
             <AccessibilityProvider>
-                <div className="min-h-screen bg-slate-50">
+                <div className="min-h-screen flex flex-col bg-slate-50">
                     {/* Live region for screen reader announcements */}
                     <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
                     
@@ -828,6 +1043,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                     />
+                    
                     <LandingPage 
                         onGetStarted={() => setCurrentView('app')}
                     />
@@ -847,7 +1063,7 @@ const App: React.FC = () => {
     if (currentView === 'about') {
         return (
             <AccessibilityProvider>
-                <div className="min-h-screen bg-slate-50">
+                <div className="min-h-screen flex flex-col bg-slate-50">
                     {/* Live region for screen reader announcements */}
                     <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
                     
@@ -857,6 +1073,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                     />
+                    
                     <AboutPage />
                     
                     {/* Global Modals */}
@@ -870,55 +1087,142 @@ const App: React.FC = () => {
         );
     }
 
-    // Placeholder pages for other views
+    // FAQ page view
     if (currentView === 'faq') {
         return (
             <AccessibilityProvider>
-                <div className="min-h-screen bg-slate-50">
+                <div className="min-h-screen flex flex-col bg-slate-50">
+                    {/* Live region for screen reader announcements */}
+                    <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
+                    
                     <ModernNavbar 
                         currentView={currentView}
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                     />
-                    <div className="max-w-4xl mx-auto py-12 px-4">
-                        <div className="text-center">
-                            <h1 className="text-4xl font-bold text-slate-800 mb-4 font-['Poppins',_sans-serif]">Sık Sorulan Sorular</h1>
-                            <p className="text-xl text-slate-600 font-['Inter',_sans-serif]">Bu sayfa yakında eklenecek...</p>
-                        </div>
-                    </div>
+                    
+                    <FAQ />
                     
                     {/* Global Modals */}
                     {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
                     {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
                     
+                    {/* Performance Monitor */}
                     <PerformanceMonitorComponent />
                 </div>
             </AccessibilityProvider>
         );
     }
 
-    if (currentView === 'login' || currentView === 'register' || currentView === 'profile' || currentView === 'settings') {
+    // Login page view
+    if (currentView === 'login') {
         return (
             <AccessibilityProvider>
-                <div className="min-h-screen bg-slate-50">
+                <LoginPage
+                    onLogin={handleLogin}
+                    onForgotPassword={handleForgotPassword}
+                    onRegisterClick={() => setCurrentView('register')}
+                    onGoogleLogin={handleGoogleLogin}
+                    loading={authLoading}
+                    error={authError || undefined}
+                    onViewChange={setCurrentView}
+                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                />
+                
+                {/* Global Modals */}
+                {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                
+                <PerformanceMonitorComponent />
+            </AccessibilityProvider>
+        );
+    }
+
+    // Register page view
+    if (currentView === 'register') {
+        return (
+            <AccessibilityProvider>
+                <SignupPage
+                    onSignup={handleSignup}
+                    onLoginClick={() => setCurrentView('login')}
+                    onGoogleSignup={handleGoogleSignup}
+                    loading={authLoading}
+                    error={authError || undefined}
+                    onViewChange={setCurrentView}
+                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                />
+                
+                {/* Global Modals */}
+                {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                
+                <PerformanceMonitorComponent />
+            </AccessibilityProvider>
+        );
+    }
+
+    // Profile page view
+    if (currentView === 'profile') {
+        return (
+            <AccessibilityProvider>
+                <UserProfilePage
+                    user={currentUser}
+                    onUpdateProfile={handleUpdateProfile}
+                    onLogout={handleLogout}
+                    onNavigateToApp={handleNavigateToApp}
+                    loading={authLoading}
+                    error={authError || undefined}
+                    onViewChange={setCurrentView}
+                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                />
+                
+                {/* Global Modals */}
+                {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                
+                <PerformanceMonitorComponent />
+            </AccessibilityProvider>
+        );
+    }
+
+    // Excel Guide page view
+    if (currentView === 'excel-guide') {
+        return (
+            <ExcelOutputGuidePage
+                currentView={currentView}
+                onViewChange={setCurrentView}
+                onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+            />
+        );
+    }
+
+    // Settings page (placeholder for now)
+    if (currentView === 'settings') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 to-white">
                     <ModernNavbar 
                         currentView={currentView}
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                     />
-                    <div className="max-w-4xl mx-auto py-12 px-4">
+                    
+                    <main className="flex-grow max-w-4xl mx-auto py-12 px-4">
                         <div className="text-center">
                             <h1 className="text-4xl font-bold text-slate-800 mb-4 font-['Poppins',_sans-serif]">
-                                {currentView === 'login' && 'Giriş Yap'}
-                                {currentView === 'register' && 'Kayıt Ol'}
-                                {currentView === 'profile' && 'Profil'}
-                                {currentView === 'settings' && 'Ayarlar'}
+                                Ayarlar
                             </h1>
-                            <p className="text-xl text-slate-600 font-['Inter',_sans-serif]">Bu sayfa yakında eklenecek...</p>
+                            <p className="text-2xl text-slate-600 font-['Inter',_sans-serif]">Bu sayfa yakında eklenecek...</p>
                         </div>
-                    </div>
+                    </main>
+                    
+                    <ModernFooter />
                     
                     {/* Global Modals */}
                     {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
@@ -933,7 +1237,7 @@ const App: React.FC = () => {
     // Main application view
     return (
         <AccessibilityProvider>
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 to-white">
                 {/* Live region for screen reader announcements */}
                 <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
                 
@@ -944,14 +1248,14 @@ const App: React.FC = () => {
                     onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                 />
 
-                <main id="main-content" className="container-responsive" role="main" aria-label="Excel formül yardımcısı ana uygulama">
-                     <div className={`grid gap-8 py-8 ${isDesktop ? 'grid-cols-4 lg:grid-cols-4' : 'grid-cols-1'}`}>
-                         <div className={isDesktop ? 'lg:col-span-3' : 'col-span-1'}>
+                <main id="main-content" className="flex-grow max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8" role="main" aria-label="Excel formül yardımcısı ana uygulama">
+                     <div className={`${isDesktop ? 'grid grid-cols-12 gap-6' : 'flex flex-col'} py-8 sm:py-12`}>
+                         <div className={isDesktop ? 'col-span-8' : 'w-full'}>
                             {/* File Upload and Prompt Section */}
                              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 space-y-responsive">
                                 {/* File Upload Section - when no workbook */}
                                 {!workbookData && (
-                                    <div className="text-center py-12">
+                                    <div className="text-center py-6">
                                         <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-6">
                                             <ExcelIcon />
                                         </div>
@@ -959,17 +1263,133 @@ const App: React.FC = () => {
                                             Excel Dosyanızı Yükleyin
                                         </h2>
                                         <p className="responsive-text-lg text-slate-600 mb-8 max-w-md mx-auto">
-                                            Formül veya makro oluşturmak için Excel dosyanızı (.xlsx, .xls) yükleyin
+                                            Formül veya makro oluşturmak için Excel dosyanızı yükleyin
                                         </p>
-                                        <AccessibleButton
+                                        
+                                        {/* Modern Excel File Format Guidelines */}
+                                        <div className="max-w-2xl mx-auto mb-8">
+                                            <div className="bg-white rounded-2xl shadow-sm border border-emerald-200/50 p-6">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                                        <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-slate-800">Excel Dosya Formatı Gereksinimleri</h3>
+                                                        <p className="text-sm text-slate-600">Desteklenen formatlar: .xlsx, .xls</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">Tüm sütunlar görünür</p>
+                                                            <p className="text-xs text-slate-600">Gizli sütunlar varsa açın</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">Her sayfa max 10 satır</p>
+                                                            <p className="text-xs text-slate-600">Analiz için optimal boyut</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">Tüm sayfalar dahil</p>
+                                                            <p className="text-xs text-slate-600">Çoklu sayfa desteği</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">Max 10MB dosya</p>
+                                                            <p className="text-xs text-slate-600">Hızlı işlem garantisi</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-100">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        <span className="text-sm font-semibold text-emerald-800">Yardıma mı ihtiyacınız var?</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => setCurrentView('excel-guide')}
+                                                        className="text-sm text-emerald-700 hover:text-emerald-800 font-medium hover:bg-emerald-100 px-3 py-1 rounded-lg transition-all duration-200 flex items-center gap-2"
+                                                    >
+                                                        <span>Detaylı rehberi görüntüle</span>
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Drag & Drop Area */}
+                                        <div 
+                                            className="border-2 border-dashed border-emerald-300 rounded-2xl p-8 hover:border-emerald-400 hover:bg-emerald-50/30 transition-all duration-200 cursor-pointer group"
                                             onClick={() => fileInputRef.current?.click()}
-                                            size={isMobile ? 'md' : 'lg'}
-                                            ariaLabel="Excel dosyası seç"
-                                            className="touch-target"
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                                e.currentTarget.classList.add('border-emerald-500', 'bg-emerald-50');
+                                            }}
+                                            onDragLeave={(e) => {
+                                                e.preventDefault();
+                                                e.currentTarget.classList.remove('border-emerald-500', 'bg-emerald-50');
+                                            }}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                e.currentTarget.classList.remove('border-emerald-500', 'bg-emerald-50');
+                                                const files = e.dataTransfer.files;
+                                                if (files.length > 0) {
+                                                    const file = files[0];
+                                                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                                                        const event = { target: { files: [file] } } as any;
+                                                        handleFileChange(event);
+                                                    }
+                                                }
+                                            }}
                                         >
-                                            <UploadIcon />
-                                            <span className="ml-2">Dosya Seç</span>
-                                        </AccessibleButton>
+                                            <div className="text-center">
+                                                <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200">
+                                                    <UploadIcon />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-slate-800 mb-2">Excel dosyanızı buraya sürükleyin</h3>
+                                                <p className="text-slate-600 mb-4">veya tıklayarak dosya seçin</p>
+                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                                    </svg>
+                                                    <span>Dosya Seç</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <input 
                                             type="file" 
                                             ref={fileInputRef} 
@@ -1149,6 +1569,7 @@ const App: React.FC = () => {
                                 activeSheet={activeSheet}
                                 onSheetChange={setActiveSheet}
                                 onCellAppend={handleAppendCellContentToPrompt}
+                                onCellClick={handleCellClickForPreview}
                                 livePreviewFormula={livePreviewFormula}
                                 liveFormulaCell={liveFormulaCell}
                                 showDataTypes={true}
@@ -1167,7 +1588,10 @@ const App: React.FC = () => {
                         
                         {renderMainContent()}
                          </div>
-                         <div className="lg:col-span-1">
+                         
+                         {/* History sidebar only on desktop */}
+                         {isDesktop && (
+                         <div className="col-span-4">
                             <HistoryDisplay 
                                 history={history} 
                                 onSelect={(res) => {
@@ -1183,6 +1607,27 @@ const App: React.FC = () => {
                                 }}
                             />
                          </div>
+                         )}
+                         
+                         {/* Mobile history section */}
+                         {!isDesktop && history.length > 0 && (
+                         <div className="mt-8">
+                            <HistoryDisplay 
+                                history={history} 
+                                onSelect={(res) => {
+                                    setResult(res);
+                                    window.scrollTo(0, 0);
+                                }} 
+                                onClear={() => {
+                                    setHistory([]);
+                                    setTrustedFormulaLibrary([]);
+                                    localStorage.removeItem('formulaHistory');
+                                    localStorage.removeItem('trustedFormulaLibrary');
+                                    setResult(null);
+                                }}
+                            />
+                         </div>
+                         )}
                      </div>
                 </main>
             <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />
@@ -1191,6 +1636,9 @@ const App: React.FC = () => {
             
             {/* Performance Monitor */}
             <PerformanceMonitorComponent />
+            
+            {/* Footer */}
+            <ModernFooter />
         </div>
         </AccessibilityProvider>
     );

@@ -554,17 +554,17 @@ export const AnimatedConcatSVG = () => {
             {/* Cell A1 */}
             <g>
                 <rect x="10" y="50" width="50" height="20" fill="#fff" stroke="#94a3b8" />
-                <text x="35" y="64" textAnchor="middle" style={commonTextStyle}>Ahmet</text>
+                <text x="35" y="64" textAnchor="middle" style={commonTextStyle}>İsim</text>
             </g>
              {/* Cell B1 */}
             <g>
                 <rect x="70" y="50" width="50" height="20" fill="#fff" stroke="#94a3b8" />
-                <text x="95" y="64" textAnchor="middle" style={commonTextStyle}>Yılmaz</text>
+                <text x="95" y="64" textAnchor="middle" style={commonTextStyle}>Soyisim</text>
             </g>
             {/* Result Cell */}
             <g>
                 <rect x="40" y="100" width="120" height="20" fill="#dcfce7" stroke="#16a34a" />
-                <text x="100" y="114" textAnchor="middle" style={{ ...commonTextStyle, opacity: step === 2 ? 1 : 0 }}>Ahmet Yılmaz</text>
+                <text x="100" y="114" textAnchor="middle" style={{ ...commonTextStyle, opacity: step === 2 ? 1 : 0 }}>İsim Soyisim</text>
             </g>
             {/* Arrows */}
             <path d="M 35 70 v 25 h 5" fill="none" stroke="#3b82f6" strokeWidth="1.5" style={{ opacity: step >= 1 ? 1 : 0 }}>

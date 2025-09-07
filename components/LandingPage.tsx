@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ModernFooter from './ModernFooter';
 
 // Icons
 const ExcelIcon = () => (
@@ -453,7 +454,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">
-                            Neden Excel Formül Yardımcısı?
+                            Neden <span className="text-emerald-600">Excel</span> Formül Yardımcısı?
                         </h2>
                         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
                             Yapay zeka gücüyle Excel çalışmanızı bir üst seviyeye taşıyın
@@ -479,7 +480,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">
-                            Nasıl Çalışır?
+                            Nasıl <span className="text-emerald-600">Çalışır?</span>
                         </h2>
                         <p className="text-xl text-slate-600 max-w-2xl mx-auto">
                             4 basit adımda Excel formüllerinizi oluşturun
@@ -628,25 +629,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-slate-800 text-white py-12">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <div className="flex items-center justify-center gap-4 mb-6">
-                            <div className="bg-emerald-600 p-2 rounded-lg">
-                                <ExcelIcon />
-                            </div>
-                            <h3 className="text-xl font-bold"><span className="text-emerald-600">ExcelBot AI:</span> AI-Powered Formül & Makro Desteği</h3>
-                        </div>
-                        <p className="text-slate-400 mb-6">
-                            Yapay zeka destekli Excel formül ve VBA makro oluşturma aracı
-                        </p>
-                        <div className="text-sm text-slate-500">
-                            Gemini AI ile güçlendirilmiştir • Türkçe desteği • Ücretsiz kullanım
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            <ModernFooter />
         </div>
     );
 };
