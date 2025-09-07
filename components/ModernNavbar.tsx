@@ -70,6 +70,17 @@ const HelpCircleIcon = () => (
   </svg>
 );
 
+const PricingIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="5" width="18" height="14" rx="2" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+    <circle cx="7" cy="9" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+    <path d="M7 9l10 6" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+    <text x="11" y="11" fill="#10b981" fontSize="6" fontWeight="bold" fontFamily="monospace">₺</text>
+    <rect x="14" y="13" width="5" height="3" rx="0.5" fill="#10b981" fillOpacity="0.2"/>
+    <circle cx="16.5" cy="14.5" r="0.5" fill="#10b981"/>
+  </svg>
+);
+
 const UserIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="8" r="4" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1.8"/>
@@ -213,8 +224,8 @@ const IconButton: React.FC<IconButtonProps> = ({ onClick, icon, tooltip, variant
 
 // Main ModernNavbar Component
 interface ModernNavbarProps {
-  currentView: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings';
-  onViewChange: (view: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings') => void;
+  currentView: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings';
+  onViewChange: (view: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings') => void;
   onOpenShortcuts: () => void;
   onOpenHelp: () => void;
   isAuthenticated?: boolean;
@@ -231,6 +242,7 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
   user = null,
   onLogout = () => {}
 }) => {
+  console.log('DEBUG - ModernNavbar props:', { isAuthenticated, user, currentView });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -309,12 +321,15 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
                 label="Ana Sayfa"
               />
               
-              <NavButton
-                onClick={() => onViewChange('app')}
-                isActive={currentView === 'app'}
-                icon={<SparklesIcon />}
-                label="Uygulama"
-              />
+              {/* Uygulama butonu sadece giriş yapıldığında görünür */}
+              {isAuthenticated && (
+                <NavButton
+                  onClick={() => onViewChange('app')}
+                  isActive={currentView === 'app'}
+                  icon={<SparklesIcon />}
+                  label="Uygulama"
+                />
+              )}
               
               <NavButton
                 onClick={() => onViewChange('about')}
@@ -328,6 +343,13 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
                 isActive={currentView === 'faq'}
                 icon={<HelpCircleIcon />}
                 label="SSS"
+              />
+              
+              <NavButton
+                onClick={() => onViewChange('pricing')}
+                isActive={currentView === 'pricing'}
+                icon={<PricingIcon />}
+                label="Fiyatlandırma"
               />
               
               <div className="w-px h-6 bg-slate-200 mx-2" />
@@ -349,63 +371,66 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
               {/* Authentication Section */}
               <div className="ml-4 flex items-center gap-3">
                 {isAuthenticated && user ? (
-                  <div className="relative">
-                    <button
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-emerald-50 transition-colors"
-                    >
-                      <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                        {user.profileImage ? (
-                          <img src={user.profileImage} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <span className="text-sm font-medium text-emerald-600">
-                            {user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-medium hidden xl:inline">{user.fullName}</span>
-                      <ChevronDownIcon />
-                    </button>
-                    
-                    {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
-                        <button
-                          onClick={() => {
-                            onViewChange('profile');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-emerald-50 transition-colors text-left"
-                        >
-                          <UserIcon />
-                          <span>Profil</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            onViewChange('settings');
-                            setIsUserMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-emerald-50 transition-colors text-left"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span>Ayarlar</span>
-                        </button>
-                        <div className="border-t border-slate-200 my-1"></div>
-                        <button
-                          onClick={() => {
-                            onLogout();
-                            setIsUserMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors text-left"
-                        >
-                          <LogoutIcon />
-                          <span>Çıkış Yap</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <>
+                    {/* User dropdown menu */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-emerald-50 transition-colors"
+                      >
+                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                          {user.profileImage ? (
+                            <img src={user.profileImage} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
+                          ) : (
+                            <span className="text-sm font-medium text-emerald-600">
+                              {user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-medium hidden xl:inline">{user.fullName}</span>
+                        <ChevronDownIcon />
+                      </button>
+                      
+                      {isUserMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                          <button
+                            onClick={() => {
+                              onViewChange('profile');
+                              setIsUserMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-emerald-50 transition-colors text-left"
+                          >
+                            <UserIcon />
+                            <span>Profil</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              onViewChange('settings');
+                              setIsUserMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-emerald-50 transition-colors text-left"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Ayarlar</span>
+                          </button>
+                          <div className="border-t border-slate-200 my-1"></div>
+                          <button
+                            onClick={() => {
+                              onLogout();
+                              setIsUserMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors text-left"
+                          >
+                            <LogoutIcon />
+                            <span>Çıkış Yap</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button
@@ -454,19 +479,22 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
                 <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Ana Sayfa</span>
               </button>
               
-              <button
-                onClick={() => onViewChange('app')}
-                className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200
-                  ${currentView === 'app'
-                    ? 'bg-emerald-100 text-emerald-700 shadow-sm'
-                    : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
-                  }
-                `}
-              >
-                <SparklesIcon />
-                <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Uygulama</span>
-              </button>
+              {/* Uygulama butonu sadece giriş yapıldığında görünür */}
+              {isAuthenticated && (
+                <button
+                  onClick={() => onViewChange('app')}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200
+                    ${currentView === 'app'
+                      ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                      : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
+                    }
+                  `}
+                >
+                  <SparklesIcon />
+                  <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Uygulama</span>
+                </button>
+              )}
               
               <button
                 onClick={() => onViewChange('about')}
@@ -494,6 +522,20 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
               >
                 <HelpCircleIcon />
                 <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">SSS</span>
+              </button>
+              
+              <button
+                onClick={() => onViewChange('pricing')}
+                className={`
+                  w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200
+                  ${currentView === 'pricing'
+                    ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                    : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
+                  }
+                `}
+              >
+                <PricingIcon />
+                <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Fiyatlandırma</span>
               </button>
               
               <div className="border-t border-slate-200 my-3"></div>

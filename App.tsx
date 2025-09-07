@@ -18,6 +18,7 @@ import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
 import UserProfilePage from './components/UserProfilePage';
 import ExcelOutputGuidePage from './components/ExcelOutputGuidePage';
+import PricingPage from './components/PricingPage';
 import { ModernNavbar } from './components/ModernNavbar';
 import EnhancedNavbar from './components/EnhancedNavbar';
 import { EnhancedExcelInterface } from './components/EnhancedExcelInterface';
@@ -30,6 +31,7 @@ import AccessibilityProvider, {
     ProgressiveDisclosure 
 } from './components/AccessibilityEnhancements';
 import './styles/accessibility.css';
+import { AuthService } from './src/services/authService';
 
 
 declare const XLSX: any;
@@ -172,7 +174,7 @@ const App: React.FC = () => {
     // Responsive breakpoint support
     const { isMobile, isTablet, isDesktop, isSmall } = useBreakpoint();
     
-    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings' | 'excel-guide'>('landing');
+    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings' | 'excel-guide'>('landing');
     const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
     const [activeSheet, setActiveSheet] = useState<string>('');
     const [fileName, setFileName] = useState<string>('');
@@ -208,6 +210,14 @@ const App: React.FC = () => {
     const [authLoading, setAuthLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState<any | null>(null);
+    
+    // Check for existing user session on mount
+    useEffect(() => {
+        const user = AuthService.getCurrentUser();
+        if (user) {
+            setCurrentUser(user);
+        }
+    }, []);
 
 
     const PlusCircleIcon = () => (
@@ -312,36 +322,10 @@ const App: React.FC = () => {
         setAuthError(null);
         
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Demo credentials check
-            if (credentials.email === 'demo@example.com' && credentials.password === 'demo123') {
-                console.log('Login successful:', credentials);
-                // Set mock user data
-                setCurrentUser({
-                    id: '1',
-                    fullName: 'Demo Kullanıcı',
-                    email: credentials.email,
-                    createdAt: new Date(),
-                    lastLogin: new Date(),
-                    membershipPlan: {
-                        id: '1',
-                        name: 'Ücretsiz Plan',
-                        type: 'free',
-                        monthlyCredits: 100,
-                        price: 0,
-                        currency: 'TRY',
-                        features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
-                        isActive: true
-                    },
-                    credits: 90,
-                    maxCredits: 100
-                });
-                setCurrentView('profile'); // Redirect to profile after successful login
-            } else {
-                throw new Error('Geçersiz e-posta adresi veya şifre');
-            }
+            const user = await AuthService.login(credentials);
+            console.log('Login successful:', user);
+            setCurrentUser(user);
+            setCurrentView('profile'); // Redirect to profile after successful login
         } catch (err) {
             setAuthError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
             throw err; // Re-throw to let the component handle it
@@ -355,36 +339,10 @@ const App: React.FC = () => {
         setAuthError(null);
         
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Check for existing email (mock validation)
-            if (userData.email === 'existing@example.com') {
-                throw new Error('Bu e-posta adresi zaten kullanılıyor');
-            }
-            
-            console.log('Signup successful:', userData);
-            // Set mock user data for new signup
-            setCurrentUser({
-                id: '4',
-                fullName: userData.fullName,
-                email: userData.email,
-                createdAt: new Date(),
-                lastLogin: null,
-                membershipPlan: {
-                    id: '1',
-                    name: 'Ücretsiz Plan',
-                    type: 'free',
-                    monthlyCredits: 100,
-                    price: 0,
-                    currency: 'TRY',
-                    features: ['Aylık 100 formül', 'Temel destek', 'Genel özellikler'],
-                    isActive: true
-                },
-                credits: 100,
-                maxCredits: 100
-            });
-            setCurrentView('profile'); // Redirect to profile after successful signup
+            const user = await AuthService.register(userData);
+            console.log('Signup successful:', user);
+            alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+            setCurrentView('login'); // Redirect to login after successful signup
             setAuthError(null);
         } catch (err) {
             setAuthError(err instanceof Error ? err.message : 'Hesap oluşturulurken bir hata oluştu');
@@ -497,7 +455,8 @@ const App: React.FC = () => {
         }
     };
     
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await AuthService.logout();
         setCurrentUser(null);
         setAuthError(null);
         setCurrentView('landing');
@@ -943,8 +902,16 @@ const App: React.FC = () => {
         if (!workbookData) {
             return (
                  <div className="text-center mt-8 p-8 border-2 border-dashed border-slate-300 rounded-2xl bg-white">
-                    <div className="mx-auto bg-emerald-100 text-emerald-600 w-16 h-16 rounded-full flex items-center justify-center">
-                        <UploadIcon />
+                    <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-20 h-20 rounded-3xl shadow-lg flex items-center justify-center ring-4 ring-white ring-opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
+                            {/* Cloud upload icon */}
+                            <path d="M7 16a4 4 0 01-.88-7.9A5 5 0 1115.9 9h.1a3 3 0 010 6" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M12 12v9" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M9 18l3 3 3-3" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            {/* Excel indicator */}
+                            <rect x="10" y="5" width="4" height="5" rx="0.5" fill="#10b981" fillOpacity="0.3"/>
+                            <text x="10.5" y="8.5" fill="#10b981" fontSize="3" fontWeight="bold" fontFamily="monospace">XL</text>
+                        </svg>
                     </div>
                     <h2 className="mt-4 text-2xl font-bold">Başlamak için bir Excel dosyası yükleyin</h2>
                     <p className="mt-2 text-slate-500">Formül veya makro oluşturmak istediğiniz dosyayı sürükleyip bırakın veya seçin.</p>
@@ -968,8 +935,30 @@ const App: React.FC = () => {
         if (isAnalyzing) {
             return (
                 <div className="text-center mt-8 p-8 bg-white rounded-2xl border border-slate-200/80">
-                    <div className="mx-auto bg-blue-100 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center animate-pulse">
-                        <BrainIcon />
+                    <div className="mx-auto bg-gradient-to-br from-emerald-100 to-blue-50 w-20 h-20 rounded-3xl shadow-lg flex items-center justify-center animate-pulse ring-4 ring-white ring-opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none">
+                            {/* AI Analysis icon */}
+                            <circle cx="12" cy="12" r="9" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+                            {/* Brain circuits */}
+                            <path d="M9 12h6M12 9v6" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
+                            <circle cx="9" cy="12" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+                            <circle cx="15" cy="12" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+                            <circle cx="12" cy="9" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+                            <circle cx="12" cy="15" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+                            {/* Analysis dots */}
+                            <circle cx="12" cy="12" r="1" fill="#10b981"/>
+                            <path d="M8 8l1 1M16 8l-1 1M8 16l1-1M16 16l-1-1" stroke="#10b981" strokeWidth="1" strokeLinecap="round" opacity="0.8"/>
+                            {/* Loading animation points */}
+                            <circle cx="6" cy="12" r="0.5" fill="#10b981">
+                                <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="18" cy="12" r="0.5" fill="#10b981">
+                                <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="12" cy="6" r="0.5" fill="#10b981">
+                                <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
                     </div>
                     <h2 className="mt-4 text-2xl font-bold">Veri analiz ediliyor...</h2>
                     <p className="mt-2 text-slate-500">Yapay zeka, tablonuzun yapısını anlamak için sütunları inceliyor. Bu işlem birkaç saniye sürebilir.</p>
@@ -1042,10 +1031,19 @@ const App: React.FC = () => {
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
                     />
                     
                     <LandingPage 
-                        onGetStarted={() => setCurrentView('app')}
+                        onGetStarted={() => {
+                            if (currentUser) {
+                                setCurrentView('app');
+                            } else {
+                                setCurrentView('login');
+                            }
+                        }}
                     />
                     
                     {/* Global Modals */}
@@ -1072,6 +1070,9 @@ const App: React.FC = () => {
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
                     />
                     
                     <AboutPage />
@@ -1100,9 +1101,43 @@ const App: React.FC = () => {
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
                     />
                     
                     <FAQ />
+                    
+                    {/* Global Modals */}
+                    {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                    {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                    
+                    {/* Performance Monitor */}
+                    <PerformanceMonitorComponent />
+                </div>
+            </AccessibilityProvider>
+        );
+    }
+
+    // Pricing page view
+    if (currentView === 'pricing') {
+        return (
+            <AccessibilityProvider>
+                <div className="min-h-screen flex flex-col bg-slate-50">
+                    {/* Live region for screen reader announcements */}
+                    <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
+                    
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
+                    />
+                    
+                    <PricingPage />
                     
                     {/* Global Modals */}
                     {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
@@ -1129,6 +1164,9 @@ const App: React.FC = () => {
                     onViewChange={setCurrentView}
                     onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                     onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    isAuthenticated={!!currentUser}
+                    user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                    onLogout={handleLogout}
                 />
                 
                 {/* Global Modals */}
@@ -1153,6 +1191,9 @@ const App: React.FC = () => {
                     onViewChange={setCurrentView}
                     onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                     onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    isAuthenticated={!!currentUser}
+                    user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                    onLogout={handleLogout}
                 />
                 
                 {/* Global Modals */}
@@ -1197,6 +1238,9 @@ const App: React.FC = () => {
                 onViewChange={setCurrentView}
                 onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                 onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                isAuthenticated={!!currentUser}
+                user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                onLogout={handleLogout}
             />
         );
     }
@@ -1211,6 +1255,9 @@ const App: React.FC = () => {
                         onViewChange={setCurrentView}
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
                     />
                     
                     <main className="flex-grow max-w-4xl mx-auto py-12 px-4">
@@ -1246,6 +1293,9 @@ const App: React.FC = () => {
                     onViewChange={setCurrentView}
                     onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                     onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    isAuthenticated={!!currentUser}
+                    user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                    onLogout={handleLogout}
                 />
 
                 <main id="main-content" className="flex-grow max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8" role="main" aria-label="Excel formül yardımcısı ana uygulama">
@@ -1256,8 +1306,24 @@ const App: React.FC = () => {
                                 {/* File Upload Section - when no workbook */}
                                 {!workbookData && (
                                     <div className="text-center py-6">
-                                        <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-6">
-                                            <ExcelIcon />
+                                        <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-6 ring-4 ring-white ring-opacity-50">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                                {/* Upload + Excel icon */}
+                                                <rect x="5" y="7" width="14" height="14" rx="2" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+                                                {/* Excel grid */}
+                                                <line x1="9" y1="11" x2="15" y2="11" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                                <line x1="9" y1="14" x2="15" y2="14" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                                <line x1="9" y1="17" x2="15" y2="17" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                                <line x1="12" y1="9" x2="12" y2="19" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                                {/* Upload arrow */}
+                                                <path d="M12 2v7" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
+                                                <path d="M9 5l3-3 3 3" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                {/* Cloud upload indicator */}
+                                                <path d="M6 3a3 3 0 00-1 5.8" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                                                <path d="M18 3a3 3 0 011 5.8" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+                                                {/* Excel formula bar */}
+                                                <text x="10" y="16" fill="#10b981" fontSize="6" fontWeight="bold" fontFamily="monospace">fx</text>
+                                            </svg>
                                         </div>
                                         <h2 className="responsive-text-2xl font-bold text-slate-800 mb-4">
                                             Excel Dosyanızı Yükleyin
@@ -1350,54 +1416,6 @@ const App: React.FC = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        
-                                        {/* Drag & Drop Area */}
-                                        <div 
-                                            className="border-2 border-dashed border-emerald-300 rounded-2xl p-8 hover:border-emerald-400 hover:bg-emerald-50/30 transition-all duration-200 cursor-pointer group"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            onDragOver={(e) => {
-                                                e.preventDefault();
-                                                e.currentTarget.classList.add('border-emerald-500', 'bg-emerald-50');
-                                            }}
-                                            onDragLeave={(e) => {
-                                                e.preventDefault();
-                                                e.currentTarget.classList.remove('border-emerald-500', 'bg-emerald-50');
-                                            }}
-                                            onDrop={(e) => {
-                                                e.preventDefault();
-                                                e.currentTarget.classList.remove('border-emerald-500', 'bg-emerald-50');
-                                                const files = e.dataTransfer.files;
-                                                if (files.length > 0) {
-                                                    const file = files[0];
-                                                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                                                        const event = { target: { files: [file] } } as any;
-                                                        handleFileChange(event);
-                                                    }
-                                                }
-                                            }}
-                                        >
-                                            <div className="text-center">
-                                                <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200">
-                                                    <UploadIcon />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-slate-800 mb-2">Excel dosyanızı buraya sürükleyin</h3>
-                                                <p className="text-slate-600 mb-4">veya tıklayarak dosya seçin</p>
-                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                                    </svg>
-                                                    <span>Dosya Seç</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <input 
-                                            type="file" 
-                                            ref={fileInputRef} 
-                                            onChange={handleFileChange} 
-                                            className="hidden" 
-                                            accept=".xlsx, .xls"
-                                            aria-label="Excel dosyası seçici"
-                                        />
                                     </div>
                                 )}
                                 

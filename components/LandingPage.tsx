@@ -267,8 +267,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-white py-20 sm:py-32">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
-                        <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-8">
-                            <BrainIcon />
+                        <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-8 ring-4 ring-white ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                {/* Excel + AI combination icon */}
+                                <rect x="3" y="3" width="14" height="18" rx="2" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+                                {/* Excel grid lines */}
+                                <line x1="7" y1="8" x2="13" y2="8" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                <line x1="7" y1="12" x2="13" y2="12" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                <line x1="7" y1="16" x2="13" y2="16" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                <line x1="10" y1="5" x2="10" y2="19" stroke="#10b981" strokeWidth="0.8" opacity="0.6"/>
+                                {/* AI brain overlay */}
+                                <circle cx="17" cy="8" r="5" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1.5"/>
+                                <path d="M15 7.5c0-0.5 0.5-1 1-1s1 0.5 1 1M19 7.5c0-0.5 0.5-1 1-1s1 0.5 1 1" stroke="#10b981" strokeWidth="1" strokeLinecap="round"/>
+                                <path d="M17 6v2M16 8h2M18 8h2" stroke="#10b981" strokeWidth="1" strokeLinecap="round"/>
+                                <circle cx="17" cy="8" r="1.5" fill="#10b981" fillOpacity="0.3"/>
+                                {/* Formula symbol */}
+                                <text x="5" y="14" fill="#10b981" fontSize="8" fontWeight="bold" fontFamily="monospace">=fx</text>
+                            </svg>
                         </div>
                         
                         <h1 className="text-4xl sm:text-6xl font-bold mb-6">

@@ -301,8 +301,23 @@ const FAQ: React.FC = () => {
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     <div className="text-center">
-                        <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-8">
-                            <QuestionIcon />
+                        <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-8 ring-4 ring-white ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                {/* FAQ/Question mark icon with chat bubbles */}
+                                <rect x="3" y="3" width="16" height="12" rx="3" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+                                <path d="M9 9a2 2 0 014 0c0 1.5-2 2-2 3" stroke="#10b981" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                                <circle cx="11" cy="14" r="0.5" fill="#10b981"/>
+                                {/* Chat bubble indicators */}
+                                <rect x="16" y="8" width="5" height="4" rx="1" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1"/>
+                                <path d="M18 12v2l1-1" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1" strokeLinejoin="round"/>
+                                <rect x="4" y="17" width="5" height="3" rx="1" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1"/>
+                                <path d="M6 20v1.5l1-1.5" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1" strokeLinejoin="round"/>
+                                {/* Dots for conversation */}
+                                <circle cx="5.5" cy="18.5" r="0.3" fill="#10b981"/>
+                                <circle cx="7" cy="18.5" r="0.3" fill="#10b981"/>
+                                <circle cx="17.5" cy="10" r="0.3" fill="#10b981"/>
+                                <circle cx="19" cy="10" r="0.3" fill="#10b981"/>
+                            </svg>
                         </div>
                         
                         <h1 className="text-4xl sm:text-5xl font-bold mb-6">

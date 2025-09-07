@@ -239,8 +239,17 @@ const AboutPage: React.FC<AboutPageProps> = ({ onGetStarted }) => {
             <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-white py-20 sm:py-32">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
-                        <div className="mx-auto bg-emerald-100 text-emerald-600 w-20 h-20 rounded-full flex items-center justify-center mb-8">
-                            <BrainIcon />
+                        <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-8 ring-4 ring-white ring-opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                {/* Building/Company icon */}
+                                <rect x="3" y="8" width="18" height="13" rx="2" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.8"/>
+                                <rect x="7" y="4" width="10" height="4" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1.5"/>
+                                <path d="M12 1v3" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round"/>
+                                <rect x="7" y="12" width="3" height="3" fill="#10b981" fillOpacity="0.3"/>
+                                <rect x="14" y="12" width="3" height="3" fill="#10b981" fillOpacity="0.3"/>
+                                <rect x="10" y="17" width="4" height="4" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1"/>
+                                <circle cx="12" cy="2" r="1" fill="#10b981"/>
+                            </svg>
                         </div>
                         
                         <h1 className="text-4xl sm:text-6xl font-bold mb-6">

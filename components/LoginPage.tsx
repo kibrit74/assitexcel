@@ -13,6 +13,9 @@ interface LoginPageProps {
   onViewChange?: (view: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings') => void;
   onOpenShortcuts?: () => void;
   onOpenHelp?: () => void;
+  isAuthenticated?: boolean;
+  user?: { fullName: string; profileImage?: string } | null;
+  onLogout?: () => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ 
@@ -24,7 +27,10 @@ const LoginPage: React.FC<LoginPageProps> = ({
   error,
   onViewChange = () => {},
   onOpenShortcuts = () => {},
-  onOpenHelp = () => {}
+  onOpenHelp = () => {},
+  isAuthenticated = false,
+  user = null,
+  onLogout = () => {}
 }) => {
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -78,6 +84,9 @@ const LoginPage: React.FC<LoginPageProps> = ({
         onViewChange={onViewChange}
         onOpenShortcuts={onOpenShortcuts}
         onOpenHelp={onOpenHelp}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        onLogout={onLogout}
       />
       
       <main className="flex-grow flex items-center justify-center py-20 sm:py-32 px-4 sm:px-6 lg:px-8">

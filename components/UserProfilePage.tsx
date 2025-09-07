@@ -116,6 +116,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
         onViewChange={onViewChange}
         onOpenShortcuts={onOpenShortcuts}
         onOpenHelp={onOpenHelp}
+        isAuthenticated={!!user}
+        user={user ? { fullName: user.full_name || user.fullName, profileImage: user.profileImage } : null}
+        onLogout={onLogout}
       />
       
       <main className="flex-grow max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">

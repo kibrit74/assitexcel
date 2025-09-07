@@ -12,6 +12,9 @@ interface SignupPageProps {
   onViewChange?: (view: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings') => void;
   onOpenShortcuts?: () => void;
   onOpenHelp?: () => void;
+  isAuthenticated?: boolean;
+  user?: { fullName: string; profileImage?: string } | null;
+  onLogout?: () => void;
 }
 
 const SignupPage: React.FC<SignupPageProps> = ({ 
@@ -22,7 +25,10 @@ const SignupPage: React.FC<SignupPageProps> = ({
   error,
   onViewChange = () => {},
   onOpenShortcuts = () => {},
-  onOpenHelp = () => {}
+  onOpenHelp = () => {},
+  isAuthenticated = false,
+  user = null,
+  onLogout = () => {}
 }) => {
   const [formData, setFormData] = useState<RegisterData>({
     fullName: '',
@@ -100,6 +106,9 @@ const SignupPage: React.FC<SignupPageProps> = ({
         onViewChange={onViewChange}
         onOpenShortcuts={onOpenShortcuts}
         onOpenHelp={onOpenHelp}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        onLogout={onLogout}
       />
       
       <main className="flex-grow flex items-center justify-center py-20 sm:py-32 px-4 sm:px-6 lg:px-8">
@@ -386,6 +395,7 @@ const SignupPage: React.FC<SignupPageProps> = ({
               </ul>
             </div>
           </div>
+        </div>
         </div>
       </main>
       
