@@ -55,9 +55,11 @@ interface ResultDisplayProps {
     onTryLive: (formula: string) => void;
     livePreviewFormula: string | null;
     onConfirmFormula: () => void;
+    onWriteToExcel?: (formula: string) => void;
+    isExcelAddin?: boolean;
 }
 
-export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onCorrectError, onTryLive, livePreviewFormula, onConfirmFormula }) => {
+export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onCorrectError, onTryLive, livePreviewFormula, onConfirmFormula, onWriteToExcel, isExcelAddin }) => {
   const [copied, setCopied] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const isLivePreviewMode = livePreviewFormula === result.formula.code;
@@ -77,6 +79,19 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onCorrectE
         className="lg:col-span-2"
         headerActions={
             <div className="flex items-center gap-2">
+                {/* Excel'e Yazma Butonu (sadece Add-in modunda) */}
+                {isExcelAddin && onWriteToExcel && (
+                    <button
+                        onClick={() => onWriteToExcel(result.formula.code)}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors text-white bg-blue-600 hover:bg-blue-700"
+                        aria-label="Formülü Excel'e yaz"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        </svg>
+                        Excel'e Yaz
+                    </button>
+                )}
                  <button
                     onClick={() => {
                         onConfirmFormula();

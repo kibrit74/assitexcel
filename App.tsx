@@ -32,6 +32,7 @@ import AccessibilityProvider, {
 } from './components/AccessibilityEnhancements';
 import './styles/accessibility.css';
 import { AuthService } from './src/services/authService';
+import { excelAddIn } from './src/services/excelAddin';
 
 
 declare const XLSX: any;
@@ -212,6 +213,42 @@ const App: React.FC = () => {
     const [authError, setAuthError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState<any | null>(null);
     
+    // Excel Add-in state
+    const [isExcelAddin, setIsExcelAddin] = useState(false);
+    const [excelInitialized, setExcelInitialized] = useState(false);
+    
+    // Initialize Excel Add-in
+    useEffect(() => {
+        const initializeExcelAddin = async () => {
+            try {
+                await excelAddIn.initialize();
+                setIsExcelAddin(excelAddIn.isRunningInExcel());
+                setExcelInitialized(true);
+                
+                if (excelAddIn.isRunningInExcel()) {
+                    console.log('Running as Excel Add-in');
+                    // Load data from Excel automatically
+                    try {
+                        const workbookData = await excelAddIn.getAllWorkbookData();
+                        if (Object.keys(workbookData).length > 0) {
+                            setWorkbookData(workbookData);
+                            setActiveSheet(Object.keys(workbookData)[0]);
+                            setFileName('Excel Workbook');
+                            performAnalysis(workbookData);
+                        }
+                    } catch (error) {
+                        console.error('Failed to load Excel data:', error);
+                    }
+                }
+            } catch (error) {
+                console.error('Excel Add-in initialization failed:', error);
+                setExcelInitialized(true); // Still allow app to work in browser mode
+            }
+        };
+        
+        initializeExcelAddin();
+    }, []);
+    
     // Check for existing user session on mount
     useEffect(() => {
         const user = AuthService.getCurrentUser();
@@ -326,6 +363,57 @@ const App: React.FC = () => {
             const newLibrary = [newItem, ...prev].slice(0, 50); // Keep library size reasonable
             return newLibrary;
         });
+    };
+    
+    // Write formula to Excel (Add-in specific)
+    const writeFormulaToExcel = async (formula: string) => {
+        if (!isExcelAddin) {
+            alert('Bu özellik sadece Excel Add-in içinde kullanılabilir.');
+            return;
+        }
+        
+        try {
+            await excelAddIn.writeFormulaToSelectedCell(formula);
+            excelAddIn.showNotification('Formül başarıyla Excel\'e yazıldı!', 'success');
+        } catch (error) {
+            console.error('Failed to write formula to Excel:', error);
+            excelAddIn.showNotification('Formül Excel\'e yazılırken hata oluştu.', 'error');
+        }
+    };
+    
+    // Copy macro to clipboard (since direct VBA insertion is restricted)
+    const copyMacroToClipboard = async (macroCode: string) => {
+        try {
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(macroCode);
+                if (isExcelAddin) {
+                    excelAddIn.showNotification('Makro kodu panoya kopyalandı. VBA editörüne (Alt+F11) yapıştırabilirsiniz.', 'success');
+                } else {
+                    alert('Makro kodu panoya kopyalandı!');
+                }
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = macroCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (isExcelAddin) {
+                    excelAddIn.showNotification('Makro kodu panoya kopyalandı.', 'success');
+                } else {
+                    alert('Makro kodu panoya kopyalandı!');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to copy macro to clipboard:', error);
+            if (isExcelAddin) {
+                excelAddIn.showNotification('Makro kodu kopyalanamadı.', 'error');
+            } else {
+                alert('Makro kodu kopyalanamadı.');
+            }
+        }
     };
 
     // Authentication handlers
@@ -907,9 +995,16 @@ const App: React.FC = () => {
                                 livePreviewFormula={livePreviewFormula}
                                 onTryLive={handleToggleLivePreview}
                                 onConfirmFormula={() => handleConfirmFormula(lastPrompt, result.data.formula.code)}
+                                onWriteToExcel={isExcelAddin ? writeFormulaToExcel : undefined}
+                                isExcelAddin={isExcelAddin}
                             />;
                 case 'macro':
-                    return <MacroResultDisplay result={result.data} onCorrectError={handleCorrectError} />;
+                    return <MacroResultDisplay 
+                                result={result.data} 
+                                onCorrectError={handleCorrectError}
+                                onCopyToClipboard={copyMacroToClipboard}
+                                isExcelAddin={isExcelAddin}
+                            />;
                 case 'web_search':
                     return <WebSearchResultDisplay
                                 result={result.data}
