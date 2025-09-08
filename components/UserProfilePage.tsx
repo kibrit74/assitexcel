@@ -352,18 +352,18 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
             </div>
 
             {/* User History */}
-            <div className=\"bg-white rounded-2xl shadow-xl p-6\">
-              <h3 className=\"text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2\">
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <span>📅</span>
                 Son Geçmiş
               </h3>
               {userHistory.length === 0 ? (
-                <div className=\"text-center py-6\">
-                  <p className=\"text-slate-500 text-sm\">Henüz geçmiş yok</p>
-                  <p className=\"text-slate-400 text-xs mt-1\">Formül oluşturduktan sonra burada görüntülenecek</p>
+                <div className="text-center py-6">
+                  <p className="text-slate-500 text-sm">Henüz geçmiş yok</p>
+                  <p className="text-slate-400 text-xs mt-1">Formül oluşturduktan sonra burada görüntülenecek</p>
                 </div>
               ) : (
-                <div className=\"space-y-3\">
+                <div className="space-y-3">
                   {userHistory.slice(0, 3).map((historyItem) => {
                     const getTypeIcon = (type: string) => {
                       switch (type) {
@@ -375,9 +375,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
                     };
 
                     return (
-                      <div key={historyItem.id} className=\"border border-slate-200 rounded-lg p-3\">
-                        <div className=\"flex items-center gap-2 mb-1\">
-                          <span className=\"text-sm\">{getTypeIcon(historyItem.resultType)}</span>
+                      <div key={historyItem.id} className="border border-slate-200 rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm">{getTypeIcon(historyItem.resultType)}</span>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                             historyItem.resultType === 'formula' 
                               ? 'bg-emerald-100 text-emerald-800'
@@ -388,10 +388,10 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
                             {historyItem.resultType === 'formula' ? 'Formül' : historyItem.resultType === 'macro' ? 'Makro' : 'Web'}
                           </span>
                         </div>
-                        <p className=\"text-sm text-slate-800 truncate\" title={historyItem.prompt}>
+                        <p className="text-sm text-slate-800 truncate" title={historyItem.prompt}>
                           {historyItem.prompt}
                         </p>
-                        <p className=\"text-xs text-slate-500 mt-1\">
+                        <p className="text-xs text-slate-500 mt-1">
                           {new Date(historyItem.createdAt).toLocaleDateString('tr-TR', {
                             day: 'numeric',
                             month: 'short',
@@ -402,7 +402,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
                         {onUseHistoryItem && (
                           <button
                             onClick={() => onUseHistoryItem(historyItem.resultData)}
-                            className=\"mt-2 w-full bg-emerald-600 text-white py-1 px-2 rounded text-xs hover:bg-emerald-700 transition-colors\"
+                            className="mt-2 w-full bg-emerald-600 text-white py-1 px-2 rounded text-xs hover:bg-emerald-700 transition-colors"
                           >
                             Tekrar Kullan
                           </button>
@@ -411,7 +411,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
                     );
                   })}
                   {userHistory.length > 3 && (
-                    <p className=\"text-xs text-slate-500 text-center mt-3\">
+                    <p className="text-xs text-slate-500 text-center mt-3">
                       +{userHistory.length - 3} daha fazla geçmiş kayıtı
                     </p>
                   )}
@@ -420,13 +420,12 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({
             </div>
 
             {/* Logout */}
-            <div className=\"bg-white rounded-2xl shadow-xl p-6\">
+            <div className="bg-white rounded-2xl shadow-xl p-6">
               <button
                 onClick={onLogout}
-                className=\"w-full bg-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all flex items-center justify-center\"
-              >
-                <svg className=\"w-5 h-5 mr-2\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                  <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1\" />
+                className="w-full bg-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all flex items-center justify-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 Çıkış Yap
               </button>

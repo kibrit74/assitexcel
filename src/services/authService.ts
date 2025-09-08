@@ -1,18 +1,11 @@
 import { supabase } from '../lib/supabase'
 import bcrypt from 'bcryptjs'
-import { DatabaseHistoryItem, UserHistory, AppResult } from '../../types'
+import { DatabaseHistoryItem, UserHistory, AppResult, RegisterData } from '../../types'
 
 export interface LoginCredentials {
   email: string
   password: string
   rememberMe?: boolean
-}
-
-export interface RegisterData {
-  fullName: string
-  email: string
-  password: string
-  acceptTerms: boolean
 }
 
 export class AuthService {

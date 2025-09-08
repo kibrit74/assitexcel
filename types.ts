@@ -89,6 +89,8 @@ export interface User {
   membershipPlan: MembershipPlan;
   credits: number;
   maxCredits: number;
+  role?: 'user' | 'admin' | 'super_admin';
+  isAdmin?: boolean;
 }
 
 export interface UserPreferences {
@@ -150,6 +152,7 @@ export interface RegisterData {
   password: string;
   fullName: string;
   confirmPassword: string;
+  acceptTerms: boolean;
 }
 
 export interface PasswordResetData {

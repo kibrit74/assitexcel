@@ -24,6 +24,8 @@ import EnhancedNavbar from './components/EnhancedNavbar';
 import { EnhancedExcelInterface } from './components/EnhancedExcelInterface';
 import { PerformanceMonitorComponent } from './components/PerformanceMonitor';
 import ModernFooter from './components/ModernFooter';
+import AdminPanel from './components/AdminPanel';
+import AdminLoginPage from './components/AdminLoginPage';
 import AccessibilityProvider, { 
     AccessibleButton, 
     LiveRegion, 
@@ -175,7 +177,7 @@ const App: React.FC = () => {
     // Responsive breakpoint support
     const { isMobile, isTablet, isDesktop, isSmall } = useBreakpoint();
     
-    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings' | 'excel-guide'>('landing');
+    const [currentView, setCurrentView] = useState<'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings' | 'excel-guide' | 'admin' | 'admin-login'>('landing');
     const [workbookData, setWorkbookData] = useState<WorkbookData | null>(null);
     const [activeSheet, setActiveSheet] = useState<string>('');
     const [fileName, setFileName] = useState<string>('');
@@ -227,6 +229,7 @@ const App: React.FC = () => {
                 
                 if (excelAddIn.isRunningInExcel()) {
                     console.log('Running as Excel Add-in');
+                    setMode('formula'); // Force formula mode in Excel add-in
                     // Load data from Excel automatically
                     try {
                         const workbookData = await excelAddIn.getAllWorkbookData();
@@ -265,6 +268,50 @@ const App: React.FC = () => {
             setDatabaseHistory(userHistory);
         } catch (error) {
             console.error('Failed to load user history:', error);
+        }
+    };
+
+    // Load Excel data function for add-in
+    const loadExcelData = async () => {
+        if (!isExcelAddin) {
+            console.warn('Not running in Excel add-in context');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const workbookData = await excelAddIn.getAllWorkbookData();
+            
+            if (Object.keys(workbookData).length > 0) {
+                setWorkbookData(workbookData);
+                setActiveSheet(Object.keys(workbookData)[0]);
+                setFileName('Excel Workbook');
+                performAnalysis(workbookData);
+                excelAddIn.showNotification('Excel verileri başarıyla yüklendi!', 'success');
+            } else {
+                excelAddIn.showNotification('Excel çalışma kitabında veri bulunamadı.', 'info');
+            }
+        } catch (error) {
+            console.error('Failed to load Excel data:', error);
+            excelAddIn.showNotification('Excel verileri yüklenirken hata oluştu.', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Write formula to Excel function for add-in
+    const writeFormulaToExcel = async (formula: string) => {
+        if (!isExcelAddin) {
+            console.warn('Not running in Excel add-in context');
+            return;
+        }
+
+        try {
+            await excelAddIn.writeFormulaToSelectedCell(formula);
+            excelAddIn.showNotification('Formül başarıyla Excel\'e yazıldı!', 'success');
+        } catch (error) {
+            console.error('Failed to write formula to Excel:', error);
+            excelAddIn.showNotification('Formül Excel\'e yazılırken hata oluştu.', 'error');
         }
     };
 
@@ -365,21 +412,7 @@ const App: React.FC = () => {
         });
     };
     
-    // Write formula to Excel (Add-in specific)
-    const writeFormulaToExcel = async (formula: string) => {
-        if (!isExcelAddin) {
-            alert('Bu özellik sadece Excel Add-in içinde kullanılabilir.');
-            return;
-        }
-        
-        try {
-            await excelAddIn.writeFormulaToSelectedCell(formula);
-            excelAddIn.showNotification('Formül başarıyla Excel\'e yazıldı!', 'success');
-        } catch (error) {
-            console.error('Failed to write formula to Excel:', error);
-            excelAddIn.showNotification('Formül Excel\'e yazılırken hata oluştu.', 'error');
-        }
-    };
+
     
     // Copy macro to clipboard (since direct VBA insertion is restricted)
     const copyMacroToClipboard = async (macroCode: string) => {
@@ -430,6 +463,50 @@ const App: React.FC = () => {
         } catch (err) {
             setAuthError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
             throw err; // Re-throw to let the component handle it
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+    // Admin login handler with special admin credentials
+    const handleAdminLogin = async (credentials: LoginCredentials): Promise<void> => {
+        setAuthLoading(true);
+        setAuthError(null);
+        
+        try {
+            // Check for demo admin credentials
+            if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
+                const adminUser = {
+                    id: 'admin-demo',
+                    email: 'admin@example.com',
+                    fullName: 'Admin Kullanıcısı',
+                    full_name: 'Admin Kullanıcısı',
+                    role: 'admin' as const,
+                    isAdmin: true,
+                    membershipPlan: { id: 'admin', name: 'Admin', type: 'pro' as const },
+                    credits: 999999,
+                    maxCredits: 999999,
+                    createdAt: new Date(),
+                    lastLogin: new Date()
+                };
+                
+                setCurrentUser(adminUser);
+                setCurrentView('admin'); // Redirect to admin panel
+                return;
+            }
+            
+            // Try normal login and check if user is admin
+            const user = await AuthService.login(credentials);
+            if (user.isAdmin || user.role === 'admin' || user.role === 'super_admin') {
+                setCurrentUser(user);
+                await loadUserHistory(user.id);
+                setCurrentView('admin');
+            } else {
+                throw new Error('Bu hesap admin yetkilerine sahip değil');
+            }
+        } catch (err) {
+            setAuthError(err instanceof Error ? err.message : 'Admin girişi yapılırken bir hata oluştu');
+            throw err;
         } finally {
             setAuthLoading(false);
         }
@@ -1151,7 +1228,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                         isAuthenticated={!!currentUser}
-                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
                         onLogout={handleLogout}
                     />
                     
@@ -1170,7 +1247,8 @@ const App: React.FC = () => {
                     {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
                     
                     {/* Performance Monitor */}
-                    <PerformanceMonitorComponent />
+                    {/* Only show performance monitor in web interface, not in Excel add-in */}
+                {!isExcelAddin && <PerformanceMonitorComponent />}
                 </div>
             </AccessibilityProvider>
         );
@@ -1190,7 +1268,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                         isAuthenticated={!!currentUser}
-                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
                         onLogout={handleLogout}
                     />
                     
@@ -1201,7 +1279,8 @@ const App: React.FC = () => {
                     {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
                     
                     {/* Performance Monitor */}
-                    <PerformanceMonitorComponent />
+                    {/* Only show performance monitor in web interface, not in Excel add-in */}
+                {!isExcelAddin && <PerformanceMonitorComponent />}
                 </div>
             </AccessibilityProvider>
         );
@@ -1221,7 +1300,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                         isAuthenticated={!!currentUser}
-                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
                         onLogout={handleLogout}
                     />
                     
@@ -1252,7 +1331,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                         isAuthenticated={!!currentUser}
-                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
                         onLogout={handleLogout}
                     />
                     
@@ -1277,6 +1356,7 @@ const App: React.FC = () => {
                     onLogin={handleLogin}
                     onForgotPassword={handleForgotPassword}
                     onRegisterClick={() => setCurrentView('register')}
+                    onAdminLoginClick={() => setCurrentView('admin-login')}
                     onGoogleLogin={handleGoogleLogin}
                     loading={authLoading}
                     error={authError || undefined}
@@ -1400,7 +1480,7 @@ const App: React.FC = () => {
                         onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
                         onOpenHelp={() => setIsHelpCenterModalOpen(true)}
                         isAuthenticated={!!currentUser}
-                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
                         onLogout={handleLogout}
                     />
                     
@@ -1413,7 +1493,8 @@ const App: React.FC = () => {
                         </div>
                     </main>
                     
-                    <ModernFooter />
+                    {/* Only show footer in web interface, not in Excel add-in */}
+                {!isExcelAddin && <ModernFooter />}
                     
                     {/* Global Modals */}
                     {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
@@ -1425,6 +1506,50 @@ const App: React.FC = () => {
         );
     }
 
+    // Admin Panel view
+    if (currentView === 'admin') {
+        return (
+            <AccessibilityProvider>
+                <AdminPanel 
+                    onNavigate={setCurrentView} 
+                    currentUser={currentUser}
+                />
+                
+                {/* Global Modals */}
+                {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                
+                <PerformanceMonitorComponent />
+            </AccessibilityProvider>
+        );
+    }
+
+    // Admin Login page view
+    if (currentView === 'admin-login') {
+        return (
+            <AccessibilityProvider>
+                <AdminLoginPage
+                    onLogin={handleAdminLogin}
+                    onBackToNormalLogin={() => setCurrentView('login')}
+                    loading={authLoading}
+                    error={authError || undefined}
+                    onViewChange={setCurrentView}
+                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                    isAuthenticated={!!currentUser}
+                    user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage, role: currentUser.role, isAdmin: currentUser.isAdmin || currentUser.role === 'admin' || currentUser.role === 'super_admin' } : null}
+                    onLogout={handleLogout}
+                />
+                
+                {/* Global Modals */}
+                {isShortcutsModalOpen && <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />}
+                {isHelpCenterModalOpen && <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />}
+                
+                <PerformanceMonitorComponent />
+            </AccessibilityProvider>
+        );
+    }
+
     // Main application view
     return (
         <AccessibilityProvider>
@@ -1432,23 +1557,26 @@ const App: React.FC = () => {
                 {/* Live region for screen reader announcements */}
                 <LiveRegion message={error || (isLoading ? 'İşlem devam ediyor...' : '')} priority="polite" />
                 
-                <ModernNavbar 
-                    currentView={currentView}
-                    onViewChange={setCurrentView}
-                    onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
-                    onOpenHelp={() => setIsHelpCenterModalOpen(true)}
-                    isAuthenticated={!!currentUser}
-                    user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
-                    onLogout={handleLogout}
-                />
+                {/* Only show navbar in web interface, not in Excel add-in */}
+                {!isExcelAddin && (
+                    <ModernNavbar 
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                        onOpenHelp={() => setIsHelpCenterModalOpen(true)}
+                        isAuthenticated={!!currentUser}
+                        user={currentUser ? { fullName: currentUser.full_name || currentUser.fullName, profileImage: currentUser.profileImage } : null}
+                        onLogout={handleLogout}
+                    />
+                )}
 
                 <main id="main-content" className="flex-grow max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8" role="main" aria-label="Excel formül yardımcısı ana uygulama">
                      <div className={`${isDesktop ? 'grid grid-cols-12 gap-6' : 'flex flex-col'} py-8 sm:py-12`}>
                          <div className={isDesktop ? 'col-span-8' : 'w-full'}>
                             {/* File Upload and Prompt Section */}
                              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 space-y-responsive">
-                                {/* File Upload Section - when no workbook */}
-                                {!workbookData && (
+                                {/* File Upload Section - only show in web interface, not in Excel add-in */}
+                                {!isExcelAddin && !workbookData && (
                                     <div className="text-center py-6">
                                         <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-6 ring-4 ring-white ring-opacity-50">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
@@ -1563,8 +1691,53 @@ const App: React.FC = () => {
                                     </div>
                                 )}
                                 
-                                {/* File Info - when workbook is loaded */}
-                                {workbookData && (
+                                {/* Excel Add-in Welcome Message - only show in Excel add-in when no data */}
+                                {isExcelAddin && !workbookData && (
+                                    <div className="text-center py-6">
+                                        <div className="mx-auto bg-gradient-to-br from-emerald-100 to-emerald-50 w-24 h-24 rounded-3xl shadow-xl flex items-center justify-center mb-6 ring-4 ring-white ring-opacity-50">
+                                            <ExcelIcon />
+                                        </div>
+                                        <h2 className="responsive-text-2xl font-bold text-slate-800 mb-4">
+                                            Excel Eklentisi Aktif
+                                        </h2>
+                                        <p className="responsive-text-lg text-slate-600 mb-8 max-w-md mx-auto">
+                                            Excel verilerinizi yükleyin veya doğrudan sütunlarla çalışın
+                                        </p>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+                                                <button
+                                                    onClick={loadExcelData}
+                                                    className="inline-flex items-center justify-center px-4 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+                                                >
+                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    Tüm Verileri Yükle
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setWorkbookData({ 'Aktif Sayfa': { data: [], colCount: 10, rowCount: 100 } });
+                                                        setActiveSheet('Aktif Sayfa');
+                                                        setFileName('Excel Workbook');
+                                                    }}
+                                                    className="inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                                                >
+                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                    Sütunlarla Çalış
+                                                </button>
+                                            </div>
+                                            <p className="text-sm text-slate-500 mt-4">
+                                                💡 İpucu: "Sütunlarla Çalış" seçeneği ile A1, B2 gibi hücre referansları kullanarak formül oluşturabilirsiniz
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* File Info - when workbook is loaded (hide in Excel add-in) */}
+                                {workbookData && !isExcelAddin && (
                                     <div className="flex items-center justify-between mb-4 p-3 bg-slate-50 rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <div className="text-emerald-600"><ExcelIcon /></div>
@@ -1583,23 +1756,25 @@ const App: React.FC = () => {
                                     </div>
                                 )}
 
-                             {/* Mode Selection */}
-                            <div className="flex justify-center mb-4">
-                                <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1">
-                                    <button
-                                        onClick={() => setMode('formula')}
-                                        className={`px-6 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'formula' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-100'}`}
-                                    >
-                                        # Formül Oluştur
-                                    </button>
-                                    <button
-                                        onClick={() => setMode('macro')}
-                                        className={`px-6 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'macro' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-100'}`}
-                                    >
-                                        ⚡ Makro Kodu Oluştur
-                                    </button>
+                             {/* Mode Selection - only show in web interface, not in Excel add-in */}
+                            {!isExcelAddin && (
+                                <div className="flex justify-center mb-4">
+                                    <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1">
+                                        <button
+                                            onClick={() => setMode('formula')}
+                                            className={`px-6 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'formula' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-100'}`}
+                                        >
+                                            # Formül Oluştur
+                                        </button>
+                                        <button
+                                            onClick={() => setMode('macro')}
+                                            className={`px-6 py-2 text-sm font-bold rounded-lg transition-colors ${mode === 'macro' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-100'}`}
+                                        >
+                                            ⚡ Makro Kodu Oluştur
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                             
                             {/* Prompt Textarea */}
                              <div className="relative">
@@ -1622,76 +1797,81 @@ const App: React.FC = () => {
                                         }
                                     }}
                                 />
-                                <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                                     {imagePreview && (
-                                        <div className="relative group">
-                                            <img src={imagePreview} alt="Ekran görüntüsü önizlemesi" className="h-8 w-8 object-cover rounded-md"/>
-                                            <button 
-                                                onClick={() => { setImage(null); setImagePreview(null); }}
-                                                className="absolute -top-2 -right-2 bg-slate-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <XCircleIcon/>
-                                            </button>
-                                        </div>
-                                    )}
-                                    <label className="cursor-pointer p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-emerald-600 transition-colors">
-                                        <AttachmentIcon />
-                                        <input type="file" className="hidden" onChange={handleImageFileChange} accept="image/*"/>
-                                    </label>
-                                </div>
+                                {/* Image attachment - hide in Excel add-in */}
+                                {!isExcelAddin && (
+                                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                                         {imagePreview && (
+                                            <div className="relative group">
+                                                <img src={imagePreview} alt="Ekran görüntüsü önizlemesi" className="h-8 w-8 object-cover rounded-md"/>
+                                                <button 
+                                                    onClick={() => { setImage(null); setImagePreview(null); }}
+                                                    className="absolute -top-2 -right-2 bg-slate-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <XCircleIcon/>
+                                                </button>
+                                            </div>
+                                        )}
+                                        <label className="cursor-pointer p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-emerald-600 transition-colors">
+                                            <AttachmentIcon />
+                                            <input type="file" className="hidden" onChange={handleImageFileChange} accept="image/*"/>
+                                        </label>
+                                    </div>
+                                )}
                              </div>
 
                              {/* Options and Submit */}
                            <div className="flex flex-col space-y-4">
-                                {/* Progressive disclosure for advanced options */}
-                                <ProgressiveDisclosure 
-                                    title="Gelişmiş Seçenekler"
-                                    defaultOpen={false}
-                                    className="border border-slate-200 rounded-lg"
-                                >
-                                    <div className="grid-responsive gap-4">
-                                        {mode === 'formula' && (
-                                            <div className="flex items-center gap-2">
-                                                <label className="font-semibold text-slate-600 text-sm">Dil:</label>
-                                                <div className="flex items-center bg-slate-100 p-0.5 rounded-lg">
-                                                    <button onClick={() => setExcelLanguage('tr')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'tr' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>TR</button>
-                                                    <button onClick={() => setExcelLanguage('en')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'en' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>EN</button>
-                                                </div>
-                                            </div>
-                                        )}
-                                         {mode === 'formula' && (
-                                            <div className="flex items-center gap-2">
-                                                <label htmlFor="excelVersion" className="font-semibold text-slate-600 text-sm">Versiyon:</label>
-                                                <div className="relative">
-                                                    <select
-                                                        id="excelVersion"
-                                                        value={excelVersion}
-                                                        onChange={(e) => setExcelVersion(e.target.value)}
-                                                        className="appearance-none bg-white border border-slate-300 rounded-lg py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                                    >
-                                                        <option value="365">365 / 2021+</option>
-                                                        <option value="2019">2019</option>
-                                                        <option value="2016">2016</option>
-                                                        <option value="2013">2013 ve Eski</option>
-                                                    </select>
-                                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
-                                                        <ChevronDownIcon />
+                                {/* Progressive disclosure for advanced options - hide in Excel add-in */}
+                                {!isExcelAddin && (
+                                    <ProgressiveDisclosure 
+                                        title="Gelişmiş Seçenekler"
+                                        defaultOpen={false}
+                                        className="border border-slate-200 rounded-lg"
+                                    >
+                                        <div className="grid-responsive gap-4">
+                                            {mode === 'formula' && (
+                                                <div className="flex items-center gap-2">
+                                                    <label className="font-semibold text-slate-600 text-sm">Dil:</label>
+                                                    <div className="flex items-center bg-slate-100 p-0.5 rounded-lg">
+                                                        <button onClick={() => setExcelLanguage('tr')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'tr' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>TR</button>
+                                                        <button onClick={() => setExcelLanguage('en')} className={`px-2 py-0.5 text-xs font-bold rounded-md transition-colors ${excelLanguage === 'en' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>EN</button>
                                                     </div>
                                                 </div>
+                                            )}
+                                             {mode === 'formula' && (
+                                                <div className="flex items-center gap-2">
+                                                    <label htmlFor="excelVersion" className="font-semibold text-slate-600 text-sm">Versiyon:</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            id="excelVersion"
+                                                            value={excelVersion}
+                                                            onChange={(e) => setExcelVersion(e.target.value)}
+                                                            className="appearance-none bg-white border border-slate-300 rounded-lg py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                        >
+                                                            <option value="365">365 / 2021+</option>
+                                                            <option value="2019">2019</option>
+                                                            <option value="2016">2016</option>
+                                                            <option value="2013">2013 ve Eski</option>
+                                                        </select>
+                                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                                                            <ChevronDownIcon />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="webSearch"
+                                                    checked={useWebSearch}
+                                                    onChange={(e) => setUseWebSearch(e.target.checked)}
+                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                />
+                                                <label htmlFor="webSearch" className="text-sm text-slate-600">🌐 Web Destekli</label>
                                             </div>
-                                        )}
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="checkbox"
-                                                id="webSearch"
-                                                checked={useWebSearch}
-                                                onChange={(e) => setUseWebSearch(e.target.checked)}
-                                                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                            />
-                                            <label htmlFor="webSearch" className="text-sm text-slate-600">🌐 Web Destekli</label>
                                         </div>
-                                    </div>
-                                </ProgressiveDisclosure>
+                                    </ProgressiveDisclosure>
+                                )}
                                 
                                 {/* Submit Button */}
                                 <div className="flex justify-center">
@@ -1751,8 +1931,8 @@ const App: React.FC = () => {
                         {renderMainContent()}
                          </div>
                          
-                         {/* History sidebar only on desktop */}
-                         {isDesktop && (
+                         {/* History sidebar only on desktop and not in Excel add-in */}
+                         {isDesktop && !isExcelAddin && (
                          <div className="col-span-4">
                             <HistoryDisplay 
                                 history={history} 
@@ -1771,8 +1951,8 @@ const App: React.FC = () => {
                          </div>
                          )}
                          
-                         {/* Mobile history section */}
-                         {!isDesktop && history.length > 0 && (
+                         {/* Mobile history section - not in Excel add-in */}
+                         {!isDesktop && !isExcelAddin && history.length > 0 && (
                          <div className="mt-8">
                             <HistoryDisplay 
                                 history={history} 
@@ -1796,11 +1976,11 @@ const App: React.FC = () => {
             <HelpCenterModal isOpen={isHelpCenterModalOpen} onClose={() => setIsHelpCenterModalOpen(false)} />
             <ExampleDetailModal example={selectedExample} onClose={() => setSelectedExample(null)} onUse={handleUseExample} />
             
-            {/* Performance Monitor */}
-            <PerformanceMonitorComponent />
+            {/* Performance Monitor - only show in web interface, not in Excel add-in */}
+            {!isExcelAddin && <PerformanceMonitorComponent />}
             
-            {/* Footer */}
-            <ModernFooter />
+            {/* Footer - only show in web interface, not in Excel add-in */}
+            {!isExcelAddin && <ModernFooter />}
         </div>
         </AccessibilityProvider>
     );

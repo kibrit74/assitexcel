@@ -139,6 +139,19 @@ const SheetIcon = () => (
   </svg>
 );
 
+const AdminIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="7" height="7" rx="1" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="1.5"/>
+    <rect x="14" y="3" width="7" height="7" rx="1" fill="#10b981" fillOpacity="0.1" stroke="#10b981" strokeWidth="1.5"/>
+    <rect x="3" y="14" width="7" height="7" rx="1" fill="#10b981" fillOpacity="0.15" stroke="#10b981" strokeWidth="1.5"/>
+    <rect x="14" y="14" width="7" height="7" rx="1" fill="#10b981" fillOpacity="0.25" stroke="#10b981" strokeWidth="1.5"/>
+    <circle cx="6.5" cy="6.5" r="1" fill="#10b981"/>
+    <circle cx="17.5" cy="6.5" r="1" fill="#10b981"/>
+    <circle cx="6.5" cy="17.5" r="1" fill="#10b981"/>
+    <circle cx="17.5" cy="17.5" r="1" fill="#10b981"/>
+  </svg>
+);
+
 const MenuIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
     <g stroke="#10b981" strokeWidth="2.5" strokeLinecap="round">
@@ -224,12 +237,12 @@ const IconButton: React.FC<IconButtonProps> = ({ onClick, icon, tooltip, variant
 
 // Main ModernNavbar Component
 interface ModernNavbarProps {
-  currentView: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings';
-  onViewChange: (view: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings') => void;
+  currentView: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings' | 'admin';
+  onViewChange: (view: 'landing' | 'app' | 'about' | 'faq' | 'pricing' | 'login' | 'register' | 'profile' | 'settings' | 'admin') => void;
   onOpenShortcuts: () => void;
   onOpenHelp: () => void;
   isAuthenticated?: boolean;
-  user?: { fullName: string; profileImage?: string } | null;
+  user?: { fullName: string; profileImage?: string; role?: 'user' | 'admin' | 'super_admin'; isAdmin?: boolean } | null;
   onLogout?: () => void;
 }
 
@@ -328,6 +341,16 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
                   isActive={currentView === 'app'}
                   icon={<SparklesIcon />}
                   label="Uygulama"
+                />
+              )}
+              
+              {/* Admin paneli butonu - sadece admin kullanıcılar için */}
+              {isAuthenticated && user && (user.isAdmin || user.role === 'admin' || user.role === 'super_admin') && (
+                <NavButton
+                  onClick={() => onViewChange('admin')}
+                  isActive={currentView === 'admin'}
+                  icon={<AdminIcon />}
+                  label="Admin Panel"
                 />
               )}
               
@@ -493,6 +516,23 @@ export const ModernNavbar: React.FC<ModernNavbarProps> = ({
                 >
                   <SparklesIcon />
                   <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Uygulama</span>
+                </button>
+              )}
+              
+              {/* Admin paneli butonu - sadece admin kullanıcılar için */}
+              {isAuthenticated && user && (user.isAdmin || user.role === 'admin' || user.role === 'super_admin') && (
+                <button
+                  onClick={() => onViewChange('admin')}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200
+                    ${currentView === 'admin'
+                      ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                      : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
+                    }
+                  `}
+                >
+                  <AdminIcon />
+                  <span className="font-semibold font-['Inter',_'Poppins',_sans-serif] tracking-wide antialiased">Admin Panel</span>
                 </button>
               )}
               

@@ -46,67 +46,134 @@ npm install
 npm run start:addin
 ```
 
-Uygulama `https://localhost:5173` adresinde çalışmaya başlayacaktır.
+Uygulama `https://localhost:5174` adresinde çalışmaya başlayacaktır.
 
-### 3. Ngrok ile Public URL Oluşturma
+### 3. Localhost Üzerinde Çalışma (Ngrok Olmadan)
 
-#### Ngrok Kurulumu
+#### SSL Sertifikası Kontrolü
 
-1. [ngrok.com](https://ngrok.com) adresinden ücretsiz hesap oluşturun
-2. Ngrok'u indirin: [https://ngrok.com/download](https://ngrok.com/download)
-3. Ngrok'u PATH'e ekleyin veya proje klasörüne kopyalayın
+1. **Sertifikaların mevcut olduğunu kontrol edin:**
+   - Proje klasöründe `localhost+2.pem` ve `localhost+2-key.pem` dosyalarının olduğunu doğrulayın
+   - Bu dosyalar 2. adımda oluşturulmuş olmalıdır
 
-#### Ngrok Yapılandırması
+2. **HTTPS sunucusunun çalıştığını doğrulayın:**
+   ```bash
+   npm run dev
+   ```
+   - Tarayıcınızda `https://localhost:5174` adresine gidin
+   - Güvenlik uyarısı alırsanız "Gelişmiş" > "localhost'a git" seçeneğini kullanın
 
-```bash
-# Ngrok hesabınızla authentication yapın
-ngrok config add-authtoken YOUR_AUTH_TOKEN
-```
+#### Localhost URL'ini Kullanma
 
-#### Public Tunnel Oluşturma
+**ÖNEMLİ:** Excel Add-in'i sadece `https://localhost:5174` URL'ini kullanacaktır. Ngrok gerekmez!
 
-```bash
-# Yeni bir terminal penceresi açın ve çalıştırın:
-ngrok http https://localhost:5173
+### 3.5. Manifest Dosyasını Kontrol Etme
 
-# Çıktı şöyle görünecektir:
-# Forwarding https://abc123.ngrok.io -> https://localhost:5173
-```
-
-**ÖNEMLİ:** Ngrok size `https://abc123.ngrok.io` gibi bir URL verecektir. Bu URL'i kopyalayın.
-
-### 4. Manifest Dosyasını Güncelleme
-
-`manifest.xml` dosyasını açın ve tüm `https://localhost:5173` URL'lerini ngrok URL'iniz ile değiştirin:
+`manifest.xml` dosyasının localhost URL'lerini kullandığından emin olun:
 
 ```xml
-<!-- Örnek: localhost yerine ngrok URL'ini kullanın -->
-<SourceLocation DefaultValue="https://abc123.ngrok.io" />
-<bt:Url id="ExcelBotAI.Taskpane.Url" DefaultValue="https://abc123.ngrok.io" />
-<!-- Icon URL'lerini de güncellemeyi unutmayın -->
-<IconUrl DefaultValue="https://abc123.ngrok.io/icon-32.png" />
+<!-- Localhost URL'lerinin doğru olduğunu kontrol edin -->
+<SourceLocation DefaultValue="https://localhost:5174" />
+<bt:Url id="ExcelBotAI.Taskpane.Url" DefaultValue="https://localhost:5174" />
+<!-- Icon URL'lerinin de localhost'u kullandığını kontrol edin -->
+<IconUrl DefaultValue="https://localhost:5174/icon-32.png" />
 ```
 
-### 5. Excel'e Eklentiyi Yükleme
+**✅ Avantaj:** Localhost kullanımında manifest dosyasını sürekli güncellemenize gerek yoktur!
 
-#### Yöntem 1: Office 365 / Excel Online
+### 4. Add-in'i Yeniden Yükleyin (Türkçe Excel)
 
-1. Excel Online'ı açın: [office.com](https://office.com)
-2. Yeni bir çalışma kitabı oluşturun
-3. **Ekle** > **Eklentiler** > **Eklentilerim** seçeneğine tıklayın
-4. **Özel Eklentiler** sekmesine geçin
-5. **URL'den Ekle** seçeneğini seçin
-6. Manifest URL'sini girin: `https://abc123.ngrok.io/manifest.xml`
-7. **Ekle** butonuna tıklayın
+#### 🔄 Türkçe Excel Masaüstü Uygulaması İçin:
 
-#### Yöntem 2: Excel Desktop (Windows)
+1. **Geliştirici sekmesine gidin**
+   - Excel'de üst menü çubuğunda **"Geliştirici"** sekmesini bulun
+   - Eğer Geliştirici sekmesi görünmüyorsa:
+     - **Dosya** > **Seçenekler** > **Şeridi Özelleştir**
+     - Sağ tarafta **"Geliştirici"** kutusunu işaretleyin
+     - **Tamam**'a tıklayın
+
+2. **Add-in'ler > Office Add-in'leri**
+   - **Geliştirici** sekmesinde **"Add-in'ler"** grubunu bulun
+   - **"Office Add-in'leri"** butonuna tıklayın
+   - Açılan pencerede **"Eklentilerim"** sekmesini seçin
+
+3. **Dosyalarım sekmesinde Karşıya Yükle**
+   - **"Dosyalarım"** sekmesine geçin
+   - **"Karşıya Yükle"** veya **"Gözat"** butonuna tıklayın
+   - Dosya gezgininde proje klasörünüzü bulun
+
+4. **`manifest.xml` dosyasını seçin**
+   - Proje klasöründeki `manifest.xml` dosyasını seçin
+   - **"Aç"** butonuna tıklayın
+   - **"Ekle"** veya **"Yükle"** butonuna tıklayın
+
+#### ⚠️ Önemli Notlar:
+- Manifest dosyasının localhost URL'lerini kullandığından emin olun (`https://localhost:5174`)
+- Excel'i yönetici olarak çalıştırmanız gerekebilir
+- Güvenlik uyarıları çıkarsa **"Güven"** veya **"Devam Et"** seçeneğini seçin
+- HTTPS sunucusunun (`npm run dev`) çalıştığından emin olun
+
+### 5. Alternatif: Excel Online Kullanın (Türkçe Excel)
+
+#### 🌐 Excel Online ile Add-in Yükleme (Önerilen Yöntem)
+
+**✅ Türkçe Excel Online Arayüzü İçin:**
+
+### 🔍 Excel Online Menü Yapısı:
+- **Dosya** 
+- **Giriş** (Ana sayfa)
+- **Ekle** 
+- **Sayfa Düzeni**
+- **Formüller** 
+- **Veri** 
+- **Gözden Geçir** 
+- **Görünüm** 
+- **Yardım**
+
+### ✅ Adım Adım Yükleme:
+
+#### 1. **Excel Online'da Ekle Sekmesi:**
+1. [office.com](https://office.com) adresinden Excel Online'ı açın
+2. Yeni bir çalışma kitabı oluşturun veya mevcut birini açın
+3. Üst menüde **"Ekle"** sekmesine tıklayın
+4. **"Office Eklentileri"** butonunu bulun ve tıklayın
+
+#### 2. **Eklenti Mağazasından:**
+1. Açılan pencerede **"Mağaza"** sekmesini seçin
+2. Arama kutusuna **"ExcelBot"** veya **"AI"** yazın
+3. Eklentinizi bulun ve **"Ekle"** butonuna tıklayın
+
+#### 3. **Manuel Yükleme (Geliştirici Modu):**
+1. **"Eklentilerim"** sekmesine geçin
+2. **"Dosyalarım"** alt sekmesini seçin
+3. **"Karşıya Yükle"** butonuna tıklayın
+4. Localhost URL'lerini içeren `manifest.xml` dosyasını seçin
+5. **"Yükle"** butonuna tıklayın
+
+**💡 İpucu:** Localhost kullanımında manifest dosyasını sürekli güncellemenize gerek yoktur!
+
+### 🚫 Yaygın Hatalar ve Çözümleri:
+
+**Hata:** "Geçerli bir Eklenti değil"
+**Çözüm:** 
+- Manifest.xml dosyasının doğru formatta olduğundan emin olun
+- Ngrok URL'lerinin güncel olduğunu kontrol edin
+- XML syntax hatalarını düzeltin
+
+**Hata:** "Güvenlik sertifikası sorunu"
+**Çözüm:**
+- HTTPS bağlantısının çalıştığını doğrulayın
+- Ngrok tunnel'ının aktif olduğunu kontrol edin
+- Tarayıcıda sertifika uyarılarını kabul edin
+
+#### Yöntem 2: Excel Masaüstü (Windows - Türkçe)
 
 1. Excel'i açın ve yeni bir çalışma kitabı oluşturun
 2. **Dosya** > **Seçenekler** > **Güven Merkezi** > **Güven Merkezi Ayarları**
 3. **Güvenilir Eklenti Katalogları** seçeneğine gidin
 4. Katalog URL'si olarak ngrok URL'inizi ekleyin: `https://abc123.ngrok.io`
-5. Excel'i yeniden başlatın
-6. **Ekle** > **Eklentilerim** > **Paylaşılan Klasör**
+5. "Güvenilir" seçeneğini işaretleyin ve Excel'i yeniden başlatın
+6. **Ekle** > **Eklentilerim** > **Paylaşılan Klasör** (veya **Office Eklentileri**)
 7. ExcelBot AI'yi listeden seçin ve **Ekle**'ye tıklayın
 
 #### Yöntem 3: Sideloading (Geliştirici Modu)
@@ -124,12 +191,29 @@ ngrok http https://localhost:5173
 3. Sağ tarafta görev bölmesi (task pane) açılacaktır
 4. Artık Excel içinden AI destekli formül ve makro oluşturabilirsiniz!
 
+#### Temel İşlemler:
+
+**📊 Formül Üretme:**
+- Türkçe açıklama girin: "Bu ayın toplam satışlarını hesapla"
+- AI size Excel formülü önerecektir
+- "Excel'e Yaz" butonuyla formülü seçili hücreye yazın
+
+**🤖 VBA Makro Oluşturma:**
+- Makro istediğinizi yazın: "Boş satırları sil"
+- Oluşturulan VBA kodunu kopyalayın
+- Alt+F11 ile VBA Editor'ü açıp yapıştırın
+
+**📋 Geçmiş Yönetimi:**
+- Daha önce oluşturduğunuz formülleri görüntüleyin
+- Profil sayfanızdan geçmiş formülleri tekrar kullanın
+- İstenmeyen formülleri silin
+
 ## 🔧 Sorun Giderme
 
 ### SSL Sertifika Hatası
 
 Tarayıcınız SSL sertifikasını kabul etmiyorsa:
-1. `https://localhost:5173` adresini tarayıcıda açın
+1. `https://localhost:5174` adresini tarayıcıda açın
 2. "Gelişmiş" seçeneğine tıklayın
 3. "localhost'a devam et (güvenli değil)" seçeneğini seçin
 
@@ -145,13 +229,22 @@ Tarayıcınız SSL sertifikasını kabul etmiyorsa:
 2. Önbelleği temizleyin: `%LOCALAPPDATA%\Microsoft\Office\16.0\Wef\`
 3. Internet Explorer'da güvenlik ayarlarını kontrol edin (Excel, IE ayarlarını kullanır)
 
+### 🚑 Acil Durum İçin Hızlı Çözümler:
+1. Excel'i **yönetici olarak** çalıştırın
+2. Manifest dosyasını tekrar yükleyin 
+3. İnternet bağlantınızı kontrol edin
+4. Tarayıcı önbelleğini temizleyip Excel Online'da deneyin
+5. Güvenlik ayarlarından eklentiye izin verildiğinden emin olun
+
+**📝 Detaylı sorun giderme:** `ADDIN_TROUBLESHOOTING.md` dosyasına bakın.
+
 ## 📝 Geliştirici Notları
 
 ### Yerel Geliştirme (Ngrok olmadan)
 
 Sadece yerel test için:
 1. Excel'de self-signed sertifikaları kabul ettirin
-2. `manifest.xml`'de `https://localhost:5173` kullanın
+2. `manifest.xml`'de `https://localhost:5174` kullanın
 3. Bu yöntem sadece geliştirme ortamı içindir
 
 ### Üretim Dağıtımı
@@ -218,7 +311,7 @@ export default defineConfig(({ mode }) => ({
       key: fs.readFileSync('./certs/localhost-key.pem'),
       cert: fs.readFileSync('./certs/localhost.pem'),
     },
-    port: 5173,
+    port: 5174,
     host: true, // External erişim için
     cors: true
   }

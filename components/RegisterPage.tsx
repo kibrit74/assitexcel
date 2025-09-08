@@ -71,7 +71,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      await onRegister(formData);
+      // Include acceptTerms in the data being passed
+      const registerData: RegisterData = {
+        ...formData,
+        acceptTerms
+      };
+      await onRegister(registerData);
     }
   };
 

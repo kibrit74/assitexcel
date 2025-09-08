@@ -62,7 +62,7 @@ const FAQPage: React.FC = () => {
     {
       id: '9',
       question: 'VBA makroları nasıl çalışır?',
-      answer: 'VBA makroları Excel içinde tekrarlayan işlemleri otomatikleştiren kod parçacıklarıdır. Oluşturulan makroları Excel\\'de Geliştirici sekmesi > Makrolar bölümünden çalıştırabilirsiniz.',
+      answer: 'VBA makroları Excel içinde tekrarlayan işlemleri otomatikleştiren kod parçacıklarıdır. Oluşturulan makroları Excel\'de Geliştirici sekmesi > Makrolar bölümünden çalıştırabilirsiniz.',
       category: 'macros'
     },
     {
@@ -74,7 +74,7 @@ const FAQPage: React.FC = () => {
     {
       id: '11',
       question: 'Makro çalışmıyor, ne yapmalıyım?',
-      answer: 'Excel\\'de makroların etkin olduğundan emin olun (Dosya > Seçenekler > Güven Merkezi > Makro Ayarları). Ayrıca makroyu doğru çalışma sayfasına yerleştirdiğinizden emin olun.',
+      answer: 'Excel\'de makroların etkin olduğundan emin olun (Dosya > Seçenekler > Güven Merkezi > Makro Ayarları). Ayrıca makroyu doğru çalışma sayfasına yerleştirdiğinizden emin olun.',
       category: 'macros'
     },
 
@@ -120,7 +120,7 @@ const FAQPage: React.FC = () => {
     {
       id: '18',
       question: 'İnternet bağlantısı olmadan kullanabilir miyim?',
-      answer: 'Hayır, uygulama yapay zeka servisleri kullandığı için internet bağlantısı gereklidir. Ancak formüller oluşturulduktan sonra Excel\\'de çevrimdışı kullanabilirsiniz.',
+      answer: 'Hayır, uygulama yapay zeka servisleri kullandığı için internet bağlantısı gereklidir. Ancak formüller oluşturulduktan sonra Excel\'de çevrimdışı kullanabilirsiniz.',
       category: 'technical'
     },
     {
@@ -162,33 +162,33 @@ const FAQPage: React.FC = () => {
     switch (category) {
       case 'general':
         return (
-          <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         );
       case 'formulas':
         return (
-          <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z\" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
         );
       case 'macros':
         return (
-          <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4\" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
           </svg>
         );
       case 'membership':
         return (
-          <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z\" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         );
       case 'technical':
         return (
-          <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z\" />
-            <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         );
       default:
@@ -201,18 +201,18 @@ const FAQPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className=\"text-4xl font-bold text-slate-800 mb-4\">
+          <h1 className="text-4xl font-bold text-slate-800 mb-4">
             Sıkça Sorulan Sorular (SSS)
           </h1>
-          <p className=\"text-lg text-slate-600 max-w-2xl mx-auto\">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Excel Formül Yardımcısı hakkında merak ettiğiniz her şey
           </p>
         </div>
 
         {/* Category Filters */}
-        <div className=\"bg-white rounded-2xl shadow-lg p-6 mb-8\">
-          <h2 className=\"text-xl font-semibold text-slate-800 mb-4\">Kategoriler</h2>
-          <div className=\"flex flex-wrap gap-2\">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Kategoriler</h2>
+          <div className="flex flex-wrap gap-2">
             {Object.entries(categories).map(([key, label]) => (
               <button
                 key={key}
@@ -242,24 +242,24 @@ const FAQPage: React.FC = () => {
         </div>
 
         {/* FAQ Items */}
-        <div className=\"space-y-4\">
+        <div className="space-y-4">
           {filteredFAQs.map((item) => (
-            <div key={item.id} className=\"bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl\">
+            <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <button
                 onClick={() => toggleExpand(item.id)}
-                className=\"w-full p-6 text-left flex items-center justify-between hover:bg-slate-50 transition-colors\"
+                className="w-full p-6 text-left flex items-center justify-between hover:bg-slate-50 transition-colors"
               >
-                <div className=\"flex items-start gap-4 flex-1\">
-                  <div className=\"flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mt-1\">
-                    <span className=\"text-emerald-600\">
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mt-1">
+                    <span className="text-emerald-600">
                       {getCategoryIcon(item.category)}
                     </span>
                   </div>
                   <div>
-                    <h3 className=\"text-lg font-semibold text-slate-800 mb-1\">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-1">
                       {item.question}
                     </h3>
-                    <span className=\"text-xs px-3 py-1 bg-slate-100 text-slate-600 rounded-full\">
+                    <span className="text-xs px-3 py-1 bg-slate-100 text-slate-600 rounded-full">
                       {categories[item.category as keyof typeof categories]}
                     </span>
                   </div>
@@ -267,17 +267,17 @@ const FAQPage: React.FC = () => {
                 <div className={`flex-shrink-0 ml-4 transform transition-transform ${
                   expandedItems.includes(item.id) ? 'rotate-180' : ''
                 }`}>
-                  <svg className=\"w-5 h-5 text-slate-500\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M19 9l-7 7-7-7\" />
+                  <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </button>
               
               {expandedItems.includes(item.id) && (
-                <div className=\"px-6 pb-6\">
-                  <div className=\"pl-12\">
-                    <div className=\"prose prose-slate max-w-none\">
-                      <p className=\"text-slate-700 leading-relaxed\">
+                <div className="px-6 pb-6">
+                  <div className="pl-12">
+                    <div className="prose prose-slate max-w-none">
+                      <p className="text-slate-700 leading-relaxed">
                         {item.answer}
                       </p>
                     </div>
@@ -290,34 +290,34 @@ const FAQPage: React.FC = () => {
 
         {/* No Results */}
         {filteredFAQs.length === 0 && (
-          <div className=\"text-center py-12\">
-            <div className=\"w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4\">
-              <svg className=\"w-12 h-12 text-slate-400\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" />
+          <div className="text-center py-12">
+            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className=\"text-xl font-semibold text-slate-800 mb-2\">Bu kategoride soru bulunamadı</h3>
-            <p className=\"text-slate-600\">Başka bir kategori seçerek daha fazla soruya göz atabilirsiniz.</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">Bu kategoride soru bulunamadı</h3>
+            <p className="text-slate-600">Başka bir kategori seçerek daha fazla soruya göz atabilirsiniz.</p>
           </div>
         )}
 
         {/* Contact Section */}
-        <div className=\"bg-gradient-to-r from-emerald-500 to-blue-500 rounded-2xl shadow-lg p-8 mt-12 text-white text-center\">
-          <h2 className=\"text-2xl font-bold mb-4\">Sorunuz cevaplanmadı mı?</h2>
-          <p className=\"text-emerald-100 mb-6 max-w-2xl mx-auto\">
+        <div className="bg-gradient-to-r from-emerald-500 to-blue-500 rounded-2xl shadow-lg p-8 mt-12 text-white text-center">
+          <h2 className="text-2xl font-bold mb-4">Sorunuz cevaplanmadı mı?</h2>
+          <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">
             Aradığınız cevabı bulamadıysanız, destek ekibimizle iletişime geçebilirsiniz. 
             Size en kısa sürede yardımcı olmaya hazırız.
           </p>
-          <div className=\"flex flex-col sm:flex-row gap-4 justify-center\">
-            <button className=\"bg-white text-emerald-600 px-6 py-3 rounded-xl font-semibold hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2\">
-              <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-white text-emerald-600 px-6 py-3 rounded-xl font-semibold hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               E-posta Gönder
             </button>
-            <button className=\"bg-white/20 border border-white/30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2\">
-              <svg className=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z\" />
+            <button className="bg-white/20 border border-white/30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               Canlı Destek
             </button>

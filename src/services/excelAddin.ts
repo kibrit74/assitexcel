@@ -27,12 +27,16 @@ export class ExcelAddInService {
                         console.log('Excel Add-in initialized successfully');
                         resolve();
                     } else {
-                        reject(new Error('This add-in only works with Excel'));
+                        // Running in different Office app, but don't reject
+                        console.log('Running in Office app other than Excel');
+                        this.isInitialized = false;
+                        resolve();
                     }
                 });
             } else {
                 // Running outside of Office context (development mode)
                 console.log('Running in development mode (outside Office)');
+                this.isInitialized = false;
                 resolve();
             }
         });

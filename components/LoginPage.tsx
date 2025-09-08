@@ -8,9 +8,10 @@ interface LoginPageProps {
   onForgotPassword: (email: string) => void;
   onRegisterClick: () => void;
   onGoogleLogin?: () => Promise<void>;
+  onAdminLoginClick?: () => void;
   loading?: boolean;
   error?: string;
-  onViewChange?: (view: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings') => void;
+  onViewChange?: (view: 'landing' | 'app' | 'about' | 'faq' | 'login' | 'register' | 'profile' | 'settings' | 'admin-login') => void;
   onOpenShortcuts?: () => void;
   onOpenHelp?: () => void;
   isAuthenticated?: boolean;
@@ -23,6 +24,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
   onForgotPassword, 
   onRegisterClick, 
   onGoogleLogin,
+  onAdminLoginClick,
   loading = false, 
   error,
   onViewChange = () => {},
@@ -275,6 +277,22 @@ const LoginPage: React.FC<LoginPageProps> = ({
                   Hemen kayıt olun
                 </button>
               </p>
+              
+              {/* Admin Login Link */}
+              {onAdminLoginClick && (
+                <div className="mt-4 pt-4 border-t border-slate-200">
+                  <button
+                    onClick={onAdminLoginClick}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium hover:underline flex items-center justify-center gap-2 mx-auto"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 1l9 4v7c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V5l9-4z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Admin Girişi
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
